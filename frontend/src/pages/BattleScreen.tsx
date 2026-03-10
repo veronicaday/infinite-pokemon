@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 import { colors } from '../styles/theme';
 import { useGameStore } from '../store/gameStore';
 import * as api from '../api/client';
@@ -12,27 +12,9 @@ import MoveAnimation from '../components/battle/MoveAnimation';
 import VsScreen from '../components/battle/VsScreen';
 import Button from '../components/ui/Button';
 import GeneratingSpinner from '../components/ui/GeneratingSpinner';
-import {
-  sfxHit,
-  sfxSpecialHit,
-  sfxSuperEffective,
-  sfxNotEffective,
-  sfxMiss,
-  sfxFaint,
-  sfxVictory,
-  sfxEvolve,
-  sfxStatus,
-} from '../audio/soundEngine';
-
-const STATUS_EMOJI: Record<string, string> = {
-  burn: '🔥',
-  freeze: '🧊',
-  paralyze: '⚡',
-  poison: '🤢',
-  sleep: '💤',
-  confuse: '💫',
-  scared: '👻',
-};
+import { sfxEvolve } from '../audio/soundEngine';
+import { STATUS_EMOJI } from '../constants/statusEffects';
+import { useBattleAnimation } from '../hooks/useBattleAnimation';
 
 export default function BattleScreen() {
   const {
@@ -41,13 +23,7 @@ export default function BattleScreen() {
     creature1State,
     creature2State,
     selectMove,
-    executeTurn,
-    battleEvents,
     displayedEvents,
-    addDisplayedEvent,
-    applyDamageToCreature,
-    applyStatusToCreature,
-    applyPendingCreatureStates,
     winner,
     resetGame,
     player1Creature,
@@ -56,122 +32,11 @@ export default function BattleScreen() {
 
   const c1 = creature1State || player1Creature;
   const c2 = creature2State || player2Creature;
-  const eventIndexRef = useRef(0);
 
-  // Track active move animation: which creature (1 or 2) is being hit, and with what type
-  const [activeAnim, setActiveAnim] = useState<{
-    target: number;
-    moveType: string;
-    key: number;
-  } | null>(null);
-  const animKeyRef = useRef(0);
+  const { activeAnim, clearAnim } = useBattleAnimation();
   const [showForfeit, setShowForfeit] = useState(false);
   const [evolvePrompt, setEvolvePrompt] = useState<{ id: string; name: string } | null>(null);
   const [isEvolving, setIsEvolving] = useState(false);
-
-  // Animate battle events sequentially: move animation plays, then damage event updates HP
-  useEffect(() => {
-    if (battlePhase !== 'animating') return;
-    if (battleEvents.length === 0) return;
-
-    let currentIndex = 0;
-    let timeoutId: ReturnType<typeof setTimeout>;
-    let cancelled = false;
-
-    function showNextEvent() {
-      if (cancelled) return;
-      if (currentIndex >= battleEvents.length) {
-        // All events shown — apply final creature states (status, stat changes) and advance
-        applyPendingCreatureStates();
-        if (useGameStore.getState().winner) {
-          sfxVictory();
-          setBattlePhase('result');
-        } else {
-          setBattlePhase('gate_p1');
-        }
-        return;
-      }
-
-      const event = battleEvents[currentIndex];
-      addDisplayedEvent(event);
-
-      if (event.event_type === 'move' && event.actor && event.move_type) {
-        // Move announcement — play the move animation on the target
-        const target = event.actor === 1 ? 2 : 1;
-        animKeyRef.current++;
-        setActiveAnim({ target, moveType: event.move_type, key: animKeyRef.current });
-
-        // Wait for animation, then continue to next event (damage event follows)
-        currentIndex++;
-        timeoutId = setTimeout(showNextEvent, 1200);
-      } else if (event.event_type === 'damage') {
-        const target = event.target as 1 | 2;
-
-        // If this damage event has a move_type (e.g. status tick like burn/poison),
-        // play the animation on the target first, then apply damage
-        const isStatusTick = event.move_type && event.actor === event.target;
-
-        if (isStatusTick) {
-          animKeyRef.current++;
-          setActiveAnim({ target, moveType: event.move_type!, key: animKeyRef.current });
-        }
-
-        const applyDelay = isStatusTick ? 800 : 0;
-        timeoutId = setTimeout(() => {
-          if (cancelled) return;
-          if (event.damage > 0) {
-            const moveType = event.move_type?.toLowerCase();
-            const isSpecial = moveType && ['psychic', 'fire', 'water', 'ice', 'electric', 'ghost', 'dragon', 'dark', 'fairy', 'cosmic', 'digital'].includes(moveType);
-            if (isSpecial) sfxSpecialHit(); else sfxHit();
-            applyDamageToCreature(target, event.damage);
-          } else {
-            sfxMiss();
-          }
-          // Play effectiveness sounds
-          if (event.effectiveness && event.effectiveness > 1) {
-            setTimeout(() => sfxSuperEffective(), 200);
-          } else if (event.effectiveness && event.effectiveness < 1 && event.effectiveness > 0) {
-            setTimeout(() => sfxNotEffective(), 200);
-          }
-          currentIndex++;
-          timeoutId = setTimeout(showNextEvent, 800);
-        }, applyDelay);
-      } else if (event.event_type === 'miss') {
-        sfxMiss();
-        currentIndex++;
-        timeoutId = setTimeout(showNextEvent, 800);
-      } else if (event.event_type === 'faint') {
-        sfxFaint();
-        currentIndex++;
-        timeoutId = setTimeout(showNextEvent, 900);
-      } else if (event.event_type === 'status') {
-        sfxStatus();
-        // If a status was applied (e.g. "was burned!"), update creature display immediately
-        const statusMatch = event.message.match(/was (burned|frozen|paralyzed|poisoned|put to sleep|confused|scared)/i);
-        if (statusMatch && event.actor) {
-          const verbToStatus: Record<string, string> = {
-            burned: 'burn', frozen: 'freeze', paralyzed: 'paralyze',
-            poisoned: 'poison', 'put to sleep': 'sleep', confused: 'confuse',
-            scared: 'scared',
-          };
-          const status = verbToStatus[statusMatch[1].toLowerCase()] || statusMatch[1].toLowerCase();
-          applyStatusToCreature(event.actor as 1 | 2, status);
-        }
-        currentIndex++;
-        timeoutId = setTimeout(showNextEvent, 900);
-      } else {
-        currentIndex++;
-        timeoutId = setTimeout(showNextEvent, 700);
-      }
-    }
-
-    showNextEvent();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [battleEvents, battlePhase]);
 
   // Record win for the winning creature's Pokedex entry
   useEffect(() => {
@@ -288,7 +153,7 @@ export default function BattleScreen() {
               <MoveAnimation
                 key={activeAnim.key}
                 moveType={activeAnim.moveType}
-                onComplete={() => setActiveAnim(null)}
+                onComplete={clearAnim}
               />
             )}
           </div>
@@ -311,7 +176,7 @@ export default function BattleScreen() {
               <MoveAnimation
                 key={activeAnim.key}
                 moveType={activeAnim.moveType}
-                onComplete={() => setActiveAnim(null)}
+                onComplete={clearAnim}
               />
             )}
           </div>

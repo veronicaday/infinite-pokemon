@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { MoveData } from '../../types/game';
 import { typeColors, typeTextColors } from '../../styles/theme';
 import { sfxSelect } from '../../audio/soundEngine';
+import { formatEffect } from '../../constants/statusEffects';
 
 interface MoveButtonProps {
   move: MoveData;
@@ -42,24 +43,6 @@ export default function MoveButton({ move, onClick }: MoveButtonProps) {
       </div>
     </button>
   );
-}
-
-const STAT_DISPLAY: Record<string, string> = {
-  attack: 'ATK', defense: 'DEF', sp_attack: 'SpATK',
-  sp_defense: 'SpDEF', speed: 'SPD', hp: 'HP',
-};
-
-function formatEffect(effect: string): string {
-  if (effect.startsWith('raise_')) {
-    const stat = effect.slice(6);
-    return `↑${STAT_DISPLAY[stat] || stat}`;
-  }
-  if (effect.startsWith('lower_')) {
-    const stat = effect.slice(6);
-    return `↓${STAT_DISPLAY[stat] || stat}`;
-  }
-  // Status effects: burn, poison, etc.
-  return effect.charAt(0).toUpperCase() + effect.slice(1);
 }
 
 function darkenHex(hex: string, amount: number): string {

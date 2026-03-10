@@ -1,10 +1,11 @@
 import { colors } from '../../styles/theme';
 import type { Stats } from '../../types/game';
 import { STAT_LABELS } from '../../types/game';
+import { useGameStore } from '../../store/gameStore';
 
-const STAT_BUDGET = 600;
-const MIN_STAT = 20;
-const MAX_STAT = 200;
+const DEFAULT_STAT_BUDGET = 600;
+const DEFAULT_MIN_STAT = 20;
+const DEFAULT_MAX_STAT = 200;
 const STAT_KEYS: (keyof Stats)[] = [
   'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed',
 ];
@@ -15,6 +16,11 @@ interface StatSlidersProps {
 }
 
 export default function StatSliders({ stats, onChange }: StatSlidersProps) {
+  const config = useGameStore((s) => s.config);
+  const STAT_BUDGET = config?.stat_budget ?? DEFAULT_STAT_BUDGET;
+  const MIN_STAT = config?.min_stat ?? DEFAULT_MIN_STAT;
+  const MAX_STAT = config?.max_stat ?? DEFAULT_MAX_STAT;
+
   const total = STAT_KEYS.reduce((sum, k) => sum + stats[k], 0);
 
   const handleChange = (changed: keyof Stats, newValue: number) => {

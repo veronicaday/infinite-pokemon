@@ -55,36 +55,37 @@ const RANDOM_CONCEPTS = [
   'A tiny dragon turtle with a volcano on its back',
 ];
 
-const STAT_BUDGET = 600;
-const MIN_STAT = 20;
-const MAX_STAT = 200;
+// Defaults match server config — overridden at runtime from loaded config
+const DEFAULT_STAT_BUDGET = 600;
+const DEFAULT_MIN_STAT = 20;
+const DEFAULT_MAX_STAT = 200;
 
-function randomStats(): Stats {
+function randomStats(budget: number, minStat: number, maxStat: number): Stats {
   const keys: (keyof Stats)[] = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
   const stats: Stats = { hp: 50, attack: 50, defense: 50, sp_attack: 50, sp_defense: 50, speed: 50 };
 
   // Generate random values, then normalize to budget
-  const raw = keys.map(() => MIN_STAT + Math.random() * (MAX_STAT - MIN_STAT));
+  const raw = keys.map(() => minStat + Math.random() * (maxStat - minStat));
   const rawSum = raw.reduce((a, b) => a + b, 0);
 
   keys.forEach((key, i) => {
-    stats[key] = Math.round((raw[i] / rawSum) * STAT_BUDGET);
+    stats[key] = Math.round((raw[i] / rawSum) * budget);
   });
 
   // Clamp and fix rounding
   keys.forEach((key) => {
-    stats[key] = Math.max(MIN_STAT, Math.min(MAX_STAT, stats[key]));
+    stats[key] = Math.max(minStat, Math.min(maxStat, stats[key]));
   });
 
   // Adjust to hit exact budget
   let total = keys.reduce((sum, k) => sum + stats[k], 0);
-  while (total !== STAT_BUDGET) {
+  while (total !== budget) {
     const idx = Math.floor(Math.random() * keys.length);
     const key = keys[idx];
-    if (total < STAT_BUDGET && stats[key] < MAX_STAT) {
+    if (total < budget && stats[key] < maxStat) {
       stats[key]++;
       total++;
-    } else if (total > STAT_BUDGET && stats[key] > MIN_STAT) {
+    } else if (total > budget && stats[key] > minStat) {
       stats[key]--;
       total--;
     }
@@ -108,7 +109,12 @@ export default function CreationScreen() {
     createBattle,
     player1Creature,
     openPokedex,
+    config,
   } = useGameStore();
+
+  const statBudget = config?.stat_budget ?? DEFAULT_STAT_BUDGET;
+  const minStat = config?.min_stat ?? DEFAULT_MIN_STAT;
+  const maxStat = config?.max_stat ?? DEFAULT_MAX_STAT;
 
   const [description, setDescription] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
@@ -120,7 +126,7 @@ export default function CreationScreen() {
     const concept = RANDOM_CONCEPTS[Math.floor(Math.random() * RANDOM_CONCEPTS.length)];
     const typeCount = Math.random() < 0.5 ? 1 : 2;
     const types = pickRandom(ALL_TYPES, typeCount);
-    const randStats = randomStats();
+    const randStats = randomStats(statBudget, minStat, maxStat);
 
     setDescription(concept);
     setSelectedTypes(types);
