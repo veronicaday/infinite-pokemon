@@ -9,6 +9,7 @@ An AI-powered creature battle game where every creature is unique. Describe a cr
 - **21 Types** — 18 classic types plus Cosmic, Sound, and Digital, with a full effectiveness chart
 - **Pokedex** — Save creatures, track win/loss records, and browse your collection
 - **Evolution** — Creatures evolve after winning enough battles, generating upgraded forms with new stats and sprites
+- **Sound Effects** — Synthesized retro sound effects for hits, victories, move selection, and more (Web Audio API, no files needed)
 
 ## Tech Stack
 
@@ -92,6 +93,7 @@ After a creature wins enough battles, it becomes eligible to evolve. Claude gene
 │       ├── pages/       # Main menu, creation, battle, pokedex screens
 │       ├── components/  # UI components (battle, creatures, shared)
 │       ├── store/       # Zustand state management
+│       ├── audio/       # Synthesized sound effects (Web Audio API)
 │       └── api/         # Backend API client
 ├── data/            # SQLite database
 └── config.py        # Game constants (stat budgets, type list, etc.)
