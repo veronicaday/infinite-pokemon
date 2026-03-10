@@ -36,6 +36,7 @@ class CreatureSchema(BaseModel):
     max_hp: int
     status: str | None = None
     sprite_svg: str | None = None
+    pokedex_id: str | None = None
 
 
 class PokedexEntry(CreatureSchema):

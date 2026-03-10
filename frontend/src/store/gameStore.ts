@@ -156,11 +156,13 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (currentPlayer === 1) {
       set({
         player1Creature: creature,
+        player1PokedexId: creature.pokedex_id,
         currentPlayer: 2,
       });
     } else {
       set({
         player2Creature: creature,
+        player2PokedexId: creature.pokedex_id,
       });
     }
   },

@@ -27,6 +27,7 @@ export interface CreatureData {
   max_hp: number;
   status: string | null;
   sprite_svg: string | null;
+  pokedex_id: string | null;
 }
 
 export interface BattleEvent {

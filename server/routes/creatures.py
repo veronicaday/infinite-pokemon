@@ -84,7 +84,8 @@ async def generate_creature(request: CreatureCreateRequest):
 
         # Auto-save to pokedex
         try:
-            save_creature(schema)
+            pokedex_id = save_creature(schema)
+            schema.pokedex_id = pokedex_id
         except Exception:
             pass  # Don't fail generation if save fails
 

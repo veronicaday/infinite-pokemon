@@ -41,7 +41,7 @@ export const typeColors: Record<string, string> = {
   Fairy: '#ee99ac',
   Cosmic: '#4b0082',
   Sound: '#ffa500',
-  Digital: '#2a2a3a',
+  Digital: '#4a5a6a',
 };
 
 /** Override text color for types where the default white doesn't work */
