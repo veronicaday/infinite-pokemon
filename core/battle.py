@@ -17,6 +17,7 @@ class BattleEvent:
     damage: int = 0
     effectiveness: float = 1.0
     move_type: str | None = None  # type of the move used (for animations)
+    target: int | None = None  # 1 or 2 — who receives the damage/effect
 
 
 class BattleEngine:
@@ -63,7 +64,7 @@ class BattleEngine:
                 if attacker.status == StatusEffect.CONFUSE:
                     self_damage = max(1, attacker.max_hp // 8)
                     attacker.take_damage(self_damage)
-                    events.append(BattleEvent("damage", attacker_id, f"{attacker.name} dealt {self_damage} to itself!", damage=self_damage))
+                    events.append(BattleEvent("damage", attacker_id, f"{attacker.name} dealt {self_damage} to itself!", damage=self_damage, target=attacker_id))
                 if attacker.is_fainted:
                     events.append(BattleEvent("faint", attacker_id, f"{attacker.name} fainted!"))
                     self.winner = defender_id
@@ -104,7 +105,7 @@ class BattleEngine:
                     "damage", attacker_id,
                     f"{defender.name} took {damage} damage!{eff_msg}",
                     damage=damage, effectiveness=effectiveness,
-                    move_type=move_type_str,
+                    move_type=move_type_str, target=defender_id,
                 ))
 
                 # Apply secondary effect
@@ -118,8 +119,12 @@ class BattleEngine:
                 self.winner = attacker_id
                 break
 
-        # End-of-turn status damage
+        # End-of-turn status damage (burn, poison)
         if self.winner is None:
+            status_type_map = {
+                StatusEffect.BURN: "Fire",
+                StatusEffect.POISON: "Poison",
+            }
             for pid in [1, 2]:
                 creature = self.creatures[pid]
                 if creature.is_fainted:
@@ -127,7 +132,8 @@ class BattleEngine:
                 damage, msg = end_of_turn_damage(creature.status, creature.max_hp)
                 if damage > 0:
                     creature.take_damage(damage)
-                    events.append(BattleEvent("damage", pid, f"{creature.name} {msg}", damage=damage))
+                    anim_type = status_type_map.get(creature.status)
+                    events.append(BattleEvent("damage", pid, f"{creature.name} {msg}", damage=damage, target=pid, move_type=anim_type))
                     if creature.is_fainted:
                         other = 2 if pid == 1 else 1
                         events.append(BattleEvent("faint", pid, f"{creature.name} fainted!"))

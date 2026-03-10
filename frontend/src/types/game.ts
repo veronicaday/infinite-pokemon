@@ -36,6 +36,7 @@ export interface BattleEvent {
   damage: number;
   effectiveness: number | null;
   move_type: string | null;
+  target: number | null;
 }
 
 export interface TypeInfo {

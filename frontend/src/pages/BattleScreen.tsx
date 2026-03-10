@@ -58,7 +58,7 @@ export default function BattleScreen() {
   const [evolvePrompt, setEvolvePrompt] = useState<{ id: string; name: string } | null>(null);
   const [isEvolving, setIsEvolving] = useState(false);
 
-  // Animate battle events sequentially: animation plays, then HP decreases
+  // Animate battle events sequentially: move animation plays, then damage event updates HP
   useEffect(() => {
     if (battlePhase !== 'animating') return;
     if (battleEvents.length === 0) return;
@@ -70,7 +70,7 @@ export default function BattleScreen() {
     function showNextEvent() {
       if (cancelled) return;
       if (currentIndex >= battleEvents.length) {
-        // All events shown — apply final creature states and advance phase
+        // All events shown — apply final creature states (status, stat changes) and advance
         applyPendingCreatureStates();
         if (useGameStore.getState().winner) {
           sfxVictory();
@@ -85,35 +85,50 @@ export default function BattleScreen() {
       addDisplayedEvent(event);
 
       if (event.event_type === 'move' && event.actor && event.move_type) {
-        // It's a move — play animation, then apply damage after it finishes
+        // Move announcement — play the move animation on the target
         const target = event.actor === 1 ? 2 : 1;
         animKeyRef.current++;
         setActiveAnim({ target, moveType: event.move_type, key: animKeyRef.current });
 
-        // Wait for animation to finish, then apply damage
+        // Wait for animation, then continue to next event (damage event follows)
+        currentIndex++;
+        timeoutId = setTimeout(showNextEvent, 1200);
+      } else if (event.event_type === 'damage') {
+        const target = event.target as 1 | 2;
+
+        // If this damage event has a move_type (e.g. status tick like burn/poison),
+        // play the animation on the target first, then apply damage
+        const isStatusTick = event.move_type && event.actor === event.target;
+
+        if (isStatusTick) {
+          animKeyRef.current++;
+          setActiveAnim({ target, moveType: event.move_type!, key: animKeyRef.current });
+        }
+
+        const applyDelay = isStatusTick ? 800 : 0;
         timeoutId = setTimeout(() => {
           if (cancelled) return;
           if (event.damage > 0) {
-            // Play hit sound based on move category
-            const moveCategory = event.move_type;
-            const isSpecial = ['psychic', 'fire', 'water', 'ice', 'electric', 'ghost', 'dragon', 'dark', 'fairy', 'cosmic', 'digital'].includes(moveCategory);
+            const moveType = event.move_type?.toLowerCase();
+            const isSpecial = moveType && ['psychic', 'fire', 'water', 'ice', 'electric', 'ghost', 'dragon', 'dark', 'fairy', 'cosmic', 'digital'].includes(moveType);
             if (isSpecial) sfxSpecialHit(); else sfxHit();
-            applyDamageToCreature(target as 1 | 2, event.damage);
+            applyDamageToCreature(target, event.damage);
           } else {
             sfxMiss();
           }
+          // Play effectiveness sounds
+          if (event.effectiveness && event.effectiveness > 1) {
+            setTimeout(() => sfxSuperEffective(), 200);
+          } else if (event.effectiveness && event.effectiveness < 1 && event.effectiveness > 0) {
+            setTimeout(() => sfxNotEffective(), 200);
+          }
           currentIndex++;
-          // Brief pause before next event
-          timeoutId = setTimeout(showNextEvent, 500);
-        }, 1200);
-      } else if (event.event_type === 'effectiveness') {
-        if (event.effectiveness && event.effectiveness > 1) {
-          sfxSuperEffective();
-        } else if (event.effectiveness && event.effectiveness < 1) {
-          sfxNotEffective();
-        }
+          timeoutId = setTimeout(showNextEvent, 800);
+        }, applyDelay);
+      } else if (event.event_type === 'miss') {
+        sfxMiss();
         currentIndex++;
-        timeoutId = setTimeout(showNextEvent, 900);
+        timeoutId = setTimeout(showNextEvent, 800);
       } else if (event.event_type === 'faint') {
         sfxFaint();
         currentIndex++;
@@ -123,9 +138,8 @@ export default function BattleScreen() {
         currentIndex++;
         timeoutId = setTimeout(showNextEvent, 900);
       } else {
-        // Other non-move events — short delay
         currentIndex++;
-        timeoutId = setTimeout(showNextEvent, 900);
+        timeoutId = setTimeout(showNextEvent, 700);
       }
     }
 

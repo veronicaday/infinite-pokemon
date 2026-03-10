@@ -322,14 +322,23 @@ export default function PokedexScreen() {
                       ))}
                     </div>
 
-                    {/* Wins counter */}
+                    {/* Record */}
                     <div style={{
                       marginTop: 8,
                       fontSize: 11,
-                      color: isEvolutionReady ? '#ffc832' : colors.textDim,
-                      fontWeight: isEvolutionReady ? 600 : 400,
+                      color: colors.textDim,
                     }}>
-                      {entry.evolved ? 'Evolved' : `Wins: ${entry.wins}/${entry.evolution_threshold}`}
+                      Record: <span style={{ color: '#4ecdc4' }}>{entry.wins}W</span>
+                      {' / '}
+                      <span style={{ color: '#ff6b6b' }}>{entry.losses}L</span>
+                      {entry.wins + entry.losses > 0 && (
+                        <span style={{ marginLeft: 4 }}>
+                          ({Math.round((entry.wins / (entry.wins + entry.losses)) * 100)}%)
+                        </span>
+                      )}
+                      {entry.evolved && (
+                        <span style={{ color: '#ffc832', fontWeight: 600, marginLeft: 6 }}>Evolved</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -509,18 +518,7 @@ export default function PokedexScreen() {
                 <span style={{ color: '#ffc832', fontWeight: 600 }}>Evolved</span>
               )}
             </div>
-            {!selectedEntry.evolved && (
-              <div style={{
-                textAlign: 'center',
-                marginTop: 4,
-                fontSize: 12,
-                color: !selectedEntry.evolved && selectedEntry.wins >= selectedEntry.evolution_threshold ? '#ffc832' : colors.textDim,
-              }}>
-                Evolution: {selectedEntry.wins}/{selectedEntry.evolution_threshold}
-              </div>
-            )}
-
-            {/* Evolution button */}
+            {/* Evolution button — appears when ready, no spoilers about threshold */}
             {!selectedEntry.evolved && selectedEntry.wins >= selectedEntry.evolution_threshold && (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
                 <Button
