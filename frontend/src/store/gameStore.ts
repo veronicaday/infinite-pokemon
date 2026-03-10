@@ -33,6 +33,8 @@ interface GameState {
   displayedEvents: BattleEvent[];
   creature1State: CreatureData | null;
   creature2State: CreatureData | null;
+  pendingCreature1State: CreatureData | null;
+  pendingCreature2State: CreatureData | null;
   winner: number | null;
 
   // Pokedex creature IDs for win tracking
@@ -60,6 +62,8 @@ interface GameState {
   executeTurn: () => Promise<void>;
   addDisplayedEvent: (event: BattleEvent) => void;
   clearDisplayedEvents: () => void;
+  applyDamageToCreature: (target: 1 | 2, damage: number) => void;
+  applyPendingCreatureStates: () => void;
   resetGame: () => void;
 }
 
@@ -79,6 +83,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   displayedEvents: [],
   creature1State: null,
   creature2State: null,
+  pendingCreature1State: null,
+  pendingCreature2State: null,
   winner: null,
   player1PokedexId: null,
   player2PokedexId: null,
@@ -205,8 +211,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     set({
       battleEvents: result.events,
-      creature1State: result.creature1,
-      creature2State: result.creature2,
+      pendingCreature1State: result.creature1,
+      pendingCreature2State: result.creature2,
       winner: result.winner,
       player1MoveIndex: null,
       player2MoveIndex: null,
@@ -217,6 +223,35 @@ export const useGameStore = create<GameState>((set, get) => ({
     set((s) => ({ displayedEvents: [...s.displayedEvents, event] })),
 
   clearDisplayedEvents: () => set({ displayedEvents: [] }),
+
+  applyDamageToCreature: (target, damage) => {
+    const state = get();
+    if (target === 1 && state.creature1State) {
+      set({
+        creature1State: {
+          ...state.creature1State,
+          current_hp: Math.max(0, state.creature1State.current_hp - damage),
+        },
+      });
+    } else if (target === 2 && state.creature2State) {
+      set({
+        creature2State: {
+          ...state.creature2State,
+          current_hp: Math.max(0, state.creature2State.current_hp - damage),
+        },
+      });
+    }
+  },
+
+  applyPendingCreatureStates: () => {
+    const { pendingCreature1State, pendingCreature2State } = get();
+    set({
+      creature1State: pendingCreature1State || get().creature1State,
+      creature2State: pendingCreature2State || get().creature2State,
+      pendingCreature1State: null,
+      pendingCreature2State: null,
+    });
+  },
 
   resetGame: () =>
     set({
@@ -234,6 +269,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       displayedEvents: [],
       creature1State: null,
       creature2State: null,
+      pendingCreature1State: null,
+      pendingCreature2State: null,
       winner: null,
       player1PokedexId: null,
       player2PokedexId: null,

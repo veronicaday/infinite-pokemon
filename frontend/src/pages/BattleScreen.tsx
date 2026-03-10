@@ -23,6 +23,8 @@ export default function BattleScreen() {
     battleEvents,
     displayedEvents,
     addDisplayedEvent,
+    applyDamageToCreature,
+    applyPendingCreatureStates,
     winner,
     resetGame,
     player1Creature,
@@ -44,37 +46,60 @@ export default function BattleScreen() {
   const [evolvePrompt, setEvolvePrompt] = useState<{ id: string; name: string } | null>(null);
   const [isEvolving, setIsEvolving] = useState(false);
 
-  // Animate battle events one by one
+  // Animate battle events sequentially: animation plays, then HP decreases
   useEffect(() => {
     if (battlePhase !== 'animating') return;
     if (battleEvents.length === 0) return;
 
-    eventIndexRef.current = 0;
-    const interval = setInterval(() => {
-      if (eventIndexRef.current < battleEvents.length) {
-        const event = battleEvents[eventIndexRef.current];
-        addDisplayedEvent(event);
+    let currentIndex = 0;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let cancelled = false;
 
-        // Trigger animation on "move" events (the defender is the other player)
-        if (event.event_type === 'move' && event.actor && event.move_type) {
-          const target = event.actor === 1 ? 2 : 1;
-          animKeyRef.current++;
-          setActiveAnim({ target, moveType: event.move_type, key: animKeyRef.current });
-        }
-
-        eventIndexRef.current++;
-      } else {
-        clearInterval(interval);
-        // After all events shown
-        if (winner) {
+    function showNextEvent() {
+      if (cancelled) return;
+      if (currentIndex >= battleEvents.length) {
+        // All events shown — apply final creature states and advance phase
+        applyPendingCreatureStates();
+        if (useGameStore.getState().winner) {
           setBattlePhase('result');
         } else {
           setBattlePhase('gate_p1');
         }
+        return;
       }
-    }, 1400);
 
-    return () => clearInterval(interval);
+      const event = battleEvents[currentIndex];
+      addDisplayedEvent(event);
+
+      if (event.event_type === 'move' && event.actor && event.move_type) {
+        // It's a move — play animation, then apply damage after it finishes
+        const target = event.actor === 1 ? 2 : 1;
+        animKeyRef.current++;
+        setActiveAnim({ target, moveType: event.move_type, key: animKeyRef.current });
+
+        // Wait for animation to finish, then apply damage
+        timeoutId = setTimeout(() => {
+          if (cancelled) return;
+          if (event.damage > 0) {
+            applyDamageToCreature(target as 1 | 2, event.damage);
+          }
+          currentIndex++;
+          // Brief pause before next event
+          timeoutId = setTimeout(showNextEvent, 500);
+        }, 1200);
+      } else {
+        // Non-move event (effectiveness, status, faint, etc.) — short delay
+        currentIndex++;
+        timeoutId = setTimeout(showNextEvent, 900);
+      }
+    }
+
+    showNextEvent();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [battleEvents, battlePhase]);
 
   // Record win for the winning creature's Pokedex entry
