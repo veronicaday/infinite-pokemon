@@ -43,11 +43,31 @@ async def generate_creature(request: CreatureCreateRequest):
             f"Set \"types\" to {request.types} in your response."
         )
 
-        creature = await asyncio.to_thread(
+        # Run creature data + sprite generation in parallel
+        creature_task = asyncio.to_thread(
             generator.generate, description_with_types, stat_prefs
         )
 
-        return creature_to_schema(creature)
+        # We need creature data first for the sprite prompt, but we can
+        # start with user-provided info for the sprite call
+        creature = await creature_task
+
+        # Now generate sprite with the actual creature data
+        schema = creature_to_schema(creature)
+        try:
+            sprite_svg = await asyncio.to_thread(
+                generator.generate_sprite,
+                creature.name,
+                creature.description,
+                [t.value for t in creature.types],
+                schema.base_stats.model_dump(),
+            )
+            schema.sprite_svg = sprite_svg
+        except Exception:
+            # Sprite generation failed — frontend will fall back to procedural
+            schema.sprite_svg = None
+
+        return schema
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

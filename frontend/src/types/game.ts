@@ -26,6 +26,7 @@ export interface CreatureData {
   current_hp: number;
   max_hp: number;
   status: string | null;
+  sprite_svg: string | null;
 }
 
 export interface BattleEvent {

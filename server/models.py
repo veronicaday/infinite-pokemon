@@ -35,6 +35,7 @@ class CreatureSchema(BaseModel):
     current_hp: int
     max_hp: int
     status: str | None = None
+    sprite_svg: str | None = None
 
 
 class CreatureCreateRequest(BaseModel):

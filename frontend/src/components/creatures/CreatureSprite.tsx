@@ -11,10 +11,17 @@ export default function CreatureSprite({
   creature,
   size = 128,
 }: CreatureSpriteProps) {
-  const svg = useMemo(
-    () => generateSvgSprite(creature, size),
-    [creature.name, creature.types.join(','), size]
-  );
+  const svg = useMemo(() => {
+    // Use Claude-generated SVG if available, otherwise fall back to procedural
+    if (creature.sprite_svg) {
+      // Resize the SVG to fit the requested size
+      return creature.sprite_svg.replace(
+        /<svg/,
+        `<svg width="${size}" height="${size}"`
+      );
+    }
+    return generateSvgSprite(creature, size);
+  }, [creature.name, creature.types.join(','), creature.sprite_svg, size]);
 
   return (
     <div
