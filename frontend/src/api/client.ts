@@ -90,3 +90,21 @@ export async function saveToPokedex(creature: CreatureData): Promise<PokedexEntr
 export async function deleteFromPokedex(id: string): Promise<void> {
   await request<void>(`/pokedex/${id}`, { method: 'DELETE' });
 }
+
+export async function recordWin(creatureId: string): Promise<PokedexEntry> {
+  const res = await fetch(`${BASE}/pokedex/${creatureId}/win`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to record win');
+  return res.json();
+}
+
+export async function recordLoss(creatureId: string): Promise<PokedexEntry> {
+  const res = await fetch(`${BASE}/pokedex/${creatureId}/loss`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to record loss');
+  return res.json();
+}
+
+export async function evolveCreature(creatureId: string): Promise<PokedexEntry> {
+  const res = await fetch(`${BASE}/pokedex/${creatureId}/evolve`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to evolve creature');
+  return res.json();
+}

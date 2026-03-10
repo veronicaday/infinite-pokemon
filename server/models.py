@@ -41,6 +41,10 @@ class CreatureSchema(BaseModel):
 class PokedexEntry(CreatureSchema):
     id: str
     created_at: str
+    wins: int = 0
+    evolution_threshold: int = 1
+    evolved: bool = False
+    losses: int = 0
 
 
 class CreatureCreateRequest(BaseModel):

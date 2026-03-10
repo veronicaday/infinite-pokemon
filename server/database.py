@@ -1,5 +1,6 @@
 import json
 import os
+import random
 import sqlite3
 import uuid
 from datetime import datetime, timezone
@@ -33,10 +34,27 @@ def init_db() -> None:
                 current_hp INTEGER NOT NULL,
                 max_hp INTEGER NOT NULL,
                 status TEXT,
-                created_at TEXT NOT NULL
+                created_at TEXT NOT NULL,
+                wins INTEGER NOT NULL DEFAULT 0,
+                evolution_threshold INTEGER NOT NULL DEFAULT 1,
+                evolved INTEGER NOT NULL DEFAULT 0,
+                losses INTEGER NOT NULL DEFAULT 0
             )
         """)
         conn.commit()
+
+        # Migration: add columns if they don't exist (for existing databases)
+        for col, definition in [
+            ("wins", "INTEGER NOT NULL DEFAULT 0"),
+            ("evolution_threshold", "INTEGER NOT NULL DEFAULT 1"),
+            ("evolved", "INTEGER NOT NULL DEFAULT 0"),
+            ("losses", "INTEGER NOT NULL DEFAULT 0"),
+        ]:
+            try:
+                conn.execute(f"ALTER TABLE creatures ADD COLUMN {col} {definition}")
+                conn.commit()
+            except sqlite3.OperationalError:
+                pass  # Column already exists
     finally:
         conn.close()
 
@@ -50,8 +68,9 @@ def save_creature(creature: CreatureSchema) -> str:
         conn.execute(
             """
             INSERT INTO creatures (id, name, description, types, base_stats, moves,
-                                   sprite_svg, current_hp, max_hp, status, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                   sprite_svg, current_hp, max_hp, status, created_at,
+                                   wins, evolution_threshold, evolved, losses)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 creature_id,
@@ -65,6 +84,10 @@ def save_creature(creature: CreatureSchema) -> str:
                 creature.max_hp,
                 creature.status,
                 created_at,
+                0,
+                1,  # Default 1 for testing (normally random.randint(25, 50))
+                0,
+                0,
             ),
         )
         conn.commit()
@@ -114,6 +137,86 @@ def delete_creature(creature_id: str) -> bool:
     try:
         cursor = conn.execute(
             "DELETE FROM creatures WHERE id = ?", (creature_id,)
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def increment_wins(creature_id: str) -> dict | None:
+    """Increment wins by 1 for the given creature. Returns updated creature dict or None."""
+    conn = _get_conn()
+    try:
+        cursor = conn.execute(
+            "UPDATE creatures SET wins = wins + 1 WHERE id = ?", (creature_id,)
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            return None
+        row = conn.execute(
+            "SELECT * FROM creatures WHERE id = ?", (creature_id,)
+        ).fetchone()
+        return _row_to_dict(row)
+    finally:
+        conn.close()
+
+
+def increment_losses(creature_id: str) -> dict | None:
+    """Increment losses by 1 for the given creature. Returns updated creature dict or None."""
+    conn = _get_conn()
+    try:
+        cursor = conn.execute(
+            "UPDATE creatures SET losses = losses + 1 WHERE id = ?", (creature_id,)
+        )
+        conn.commit()
+        if cursor.rowcount == 0:
+            return None
+        row = conn.execute(
+            "SELECT * FROM creatures WHERE id = ?", (creature_id,)
+        ).fetchone()
+        return _row_to_dict(row)
+    finally:
+        conn.close()
+
+
+def update_creature(creature_id: str, creature_data: dict) -> bool:
+    """Update a creature's core data (for evolution replacement). Returns True if updated."""
+    conn = _get_conn()
+    try:
+        cursor = conn.execute(
+            """
+            UPDATE creatures
+            SET name = ?, description = ?, types = ?, base_stats = ?, moves = ?,
+                sprite_svg = ?, current_hp = ?, max_hp = ?, status = ?
+            WHERE id = ?
+            """,
+            (
+                creature_data["name"],
+                creature_data["description"],
+                json.dumps(creature_data["types"]),
+                json.dumps(creature_data["base_stats"]),
+                json.dumps(creature_data["moves"]),
+                creature_data.get("sprite_svg"),
+                creature_data["current_hp"],
+                creature_data["max_hp"],
+                creature_data.get("status"),
+                creature_id,
+            ),
+        )
+        conn.commit()
+        return cursor.rowcount > 0
+    finally:
+        conn.close()
+
+
+def reset_wins(creature_id: str) -> bool:
+    """Reset wins to 0 and mark as evolved."""
+    conn = _get_conn()
+    try:
+        cursor = conn.execute(
+            "UPDATE creatures SET wins = 0, evolved = 1 WHERE id = ?",
+            (creature_id,),
         )
         conn.commit()
         return cursor.rowcount > 0

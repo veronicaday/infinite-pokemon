@@ -54,6 +54,10 @@ export interface GameConfig {
 export interface PokedexEntry extends CreatureData {
   id: string;
   created_at: string;
+  wins: number;
+  evolution_threshold: number;
+  evolved: boolean;
+  losses: number;
 }
 
 export type Screen = 'menu' | 'creation' | 'battle' | 'pokedex';

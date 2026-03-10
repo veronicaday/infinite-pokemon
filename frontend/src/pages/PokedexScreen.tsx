@@ -62,9 +62,23 @@ export default function PokedexScreen() {
     setSelectedEntry(entry);
   };
 
+  const [evolving, setEvolving] = useState(false);
+
   const handlePickForBattle = (entry: PokedexEntry) => {
-    const { id, created_at, ...creature } = entry;
-    selectFromPokedex(creature);
+    selectFromPokedex(entry);
+  };
+
+  const handleEvolve = async (entry: PokedexEntry) => {
+    setEvolving(true);
+    try {
+      const evolved = await api.evolveCreature(entry.id);
+      setEntries((prev) => prev.map((e) => (e.id === entry.id ? evolved : e)));
+      setSelectedEntry(evolved);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to evolve creature');
+    } finally {
+      setEvolving(false);
+    }
   };
 
   const handleBack = () => {
@@ -85,6 +99,12 @@ export default function PokedexScreen() {
         background: colors.bg,
       }}
     >
+      <style>{`
+        @keyframes evolutionGlow {
+          0%, 100% { box-shadow: 0 0 10px rgba(255, 200, 50, 0.4); }
+          50% { box-shadow: 0 0 20px rgba(255, 200, 50, 0.8), 0 0 30px rgba(255, 180, 30, 0.4); }
+        }
+      `}</style>
       {/* Header */}
       <div
         style={{
@@ -184,7 +204,9 @@ export default function PokedexScreen() {
               gap: 16,
             }}
           >
-            {entries.map((entry) => (
+            {entries.map((entry) => {
+              const isEvolutionReady = !entry.evolved && entry.wins >= entry.evolution_threshold;
+              return (
               <div
                 key={entry.id}
                 onClick={() => handleCardClick(entry)}
@@ -193,7 +215,11 @@ export default function PokedexScreen() {
                 style={{
                   background: hoveredId === entry.id ? '#32324a' : colors.panel,
                   border: `2px solid ${
-                    hoveredId === entry.id ? colors.accent : colors.panelBorder
+                    isEvolutionReady
+                      ? 'rgba(255, 200, 50, 0.7)'
+                      : hoveredId === entry.id
+                        ? colors.accent
+                        : colors.panelBorder
                   }`,
                   borderRadius: 12,
                   padding: 16,
@@ -204,6 +230,7 @@ export default function PokedexScreen() {
                     hoveredId === entry.id
                       ? 'translateY(-2px)'
                       : 'none',
+                  animation: isEvolutionReady ? 'evolutionGlow 2s ease-in-out infinite' : 'none',
                 }}
               >
                 {/* Delete button */}
@@ -294,10 +321,21 @@ export default function PokedexScreen() {
                         </div>
                       ))}
                     </div>
+
+                    {/* Wins counter */}
+                    <div style={{
+                      marginTop: 8,
+                      fontSize: 11,
+                      color: isEvolutionReady ? '#ffc832' : colors.textDim,
+                      fontWeight: isEvolutionReady ? 600 : 400,
+                    }}>
+                      {entry.evolved ? 'Evolved' : `Wins: ${entry.wins}/${entry.evolution_threshold}`}
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -447,6 +485,55 @@ export default function PokedexScreen() {
                 ))}
               </div>
             </div>
+
+            {/* Battle record */}
+            <div style={{
+              display: 'flex',
+              gap: 20,
+              justifyContent: 'center',
+              marginTop: 16,
+              fontSize: 14,
+            }}>
+              <span style={{ color: '#4ecdc4' }}>
+                <span style={{ fontWeight: 600 }}>{selectedEntry.wins}</span> W
+              </span>
+              <span style={{ color: '#ff6b6b' }}>
+                <span style={{ fontWeight: 600 }}>{selectedEntry.losses}</span> L
+              </span>
+              <span style={{ color: colors.textDim }}>
+                {selectedEntry.wins + selectedEntry.losses > 0
+                  ? `${Math.round((selectedEntry.wins / (selectedEntry.wins + selectedEntry.losses)) * 100)}%`
+                  : '—'}
+              </span>
+              {selectedEntry.evolved && (
+                <span style={{ color: '#ffc832', fontWeight: 600 }}>Evolved</span>
+              )}
+            </div>
+            {!selectedEntry.evolved && (
+              <div style={{
+                textAlign: 'center',
+                marginTop: 4,
+                fontSize: 12,
+                color: !selectedEntry.evolved && selectedEntry.wins >= selectedEntry.evolution_threshold ? '#ffc832' : colors.textDim,
+              }}>
+                Evolution: {selectedEntry.wins}/{selectedEntry.evolution_threshold}
+              </div>
+            )}
+
+            {/* Evolution button */}
+            {!selectedEntry.evolved && selectedEntry.wins >= selectedEntry.evolution_threshold && (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+                <Button
+                  label={evolving ? 'Evolving...' : 'Ready to Evolve!'}
+                  onClick={() => !evolving && handleEvolve(selectedEntry)}
+                  color="#d4a017"
+                  hoverColor="#f0c040"
+                  fontSize={18}
+                  width={220}
+                  height={48}
+                />
+              </div>
+            )}
 
             {/* Select for battle button (only in selection mode) */}
             {isSelectionMode && (

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { colors } from '../styles/theme';
 import { useGameStore } from '../store/gameStore';
+import * as api from '../api/client';
 import CreatureSprite from '../components/creatures/CreatureSprite';
 import TypeBadge from '../components/ui/TypeBadge';
 import HealthBar from '../components/battle/HealthBar';
@@ -40,6 +41,8 @@ export default function BattleScreen() {
   } | null>(null);
   const animKeyRef = useRef(0);
   const [showForfeit, setShowForfeit] = useState(false);
+  const [evolvePrompt, setEvolvePrompt] = useState<{ id: string; name: string } | null>(null);
+  const [isEvolving, setIsEvolving] = useState(false);
 
   // Animate battle events one by one
   useEffect(() => {
@@ -73,6 +76,28 @@ export default function BattleScreen() {
 
     return () => clearInterval(interval);
   }, [battleEvents, battlePhase]);
+
+  // Record win for the winning creature's Pokedex entry
+  useEffect(() => {
+    if (!winner) return;
+    const winnerPokedexId = winner === 1
+      ? useGameStore.getState().player1PokedexId
+      : useGameStore.getState().player2PokedexId;
+    if (winnerPokedexId) {
+      api.recordWin(winnerPokedexId).then((updated) => {
+        if (!updated.evolved && updated.wins >= updated.evolution_threshold) {
+          setEvolvePrompt({ id: updated.id, name: updated.name });
+        }
+      }).catch(console.error);
+    }
+    // Record loss for the loser
+    const loserPokedexId = winner === 1
+      ? useGameStore.getState().player2PokedexId
+      : useGameStore.getState().player1PokedexId;
+    if (loserPokedexId) {
+      api.recordLoss(loserPokedexId).catch(console.error);
+    }
+  }, [winner]);
 
   const handleMoveSelect = useCallback(
     async (moveIndex: number) => {
@@ -306,6 +331,85 @@ export default function BattleScreen() {
             width={200}
             height={52}
           />
+        </div>
+      )}
+
+      {/* Evolution prompt overlay */}
+      {evolvePrompt && (
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 25,
+          }}
+        >
+          <div
+            style={{
+              background: colors.surface,
+              border: '2px solid #f0c040',
+              borderRadius: 16,
+              padding: 40,
+              textAlign: 'center',
+              maxWidth: 420,
+              boxShadow: '0 0 40px rgba(240, 192, 64, 0.4)',
+            }}
+          >
+            <div style={{ fontSize: 40, marginBottom: 8 }}>&#x2728;</div>
+            <h2
+              style={{
+                fontSize: 28,
+                fontWeight: 800,
+                color: '#f0c040',
+                margin: '0 0 8px',
+                textShadow: '0 0 16px rgba(240, 192, 64, 0.5)',
+              }}
+            >
+              {evolvePrompt.name}
+            </h2>
+            <p style={{ fontSize: 20, color: colors.text, margin: '0 0 24px' }}>
+              is ready to evolve!
+            </p>
+            {isEvolving ? (
+              <p style={{ color: '#f0c040', fontSize: 16 }}>Evolving...</p>
+            ) : (
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <Button
+                  label="Evolve!"
+                  onClick={async () => {
+                    setIsEvolving(true);
+                    try {
+                      await api.evolveCreature(evolvePrompt.id);
+                      setEvolvePrompt(null);
+                    } catch {
+                      // Evolution failed, dismiss
+                      setEvolvePrompt(null);
+                    } finally {
+                      setIsEvolving(false);
+                    }
+                  }}
+                  color="#f0c040"
+                  hoverColor="#f5d060"
+                  textColor="#1a1a2e"
+                  fontSize={18}
+                  width={160}
+                  height={48}
+                />
+                <Button
+                  label="Not Now"
+                  onClick={() => setEvolvePrompt(null)}
+                  color={colors.button}
+                  hoverColor={colors.buttonHover}
+                  fontSize={16}
+                  width={120}
+                  height={48}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 

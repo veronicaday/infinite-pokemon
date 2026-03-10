@@ -6,6 +6,7 @@ import type {
   BattleEvent,
   GameConfig,
   Stats,
+  PokedexEntry,
 } from '../types/game';
 import * as api from '../api/client';
 
@@ -34,6 +35,10 @@ interface GameState {
   creature2State: CreatureData | null;
   winner: number | null;
 
+  // Pokedex creature IDs for win tracking
+  player1PokedexId: string | null;
+  player2PokedexId: string | null;
+
   // Pokedex selection mode: which player triggered pokedex from creation
   pokedexReturnTo: Screen | null;
 
@@ -42,7 +47,7 @@ interface GameState {
   setScreen: (screen: Screen) => void;
   startNewGame: () => void;
   openPokedex: (returnTo?: Screen) => void;
-  selectFromPokedex: (creature: CreatureData) => void;
+  selectFromPokedex: (entry: PokedexEntry) => void;
   generateCreature: (
     description: string,
     types: string[],
@@ -75,6 +80,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   creature1State: null,
   creature2State: null,
   winner: null,
+  player1PokedexId: null,
+  player2PokedexId: null,
   pokedexReturnTo: null,
 
   loadConfig: async () => {
@@ -99,11 +106,13 @@ export const useGameStore = create<GameState>((set, get) => ({
       pokedexReturnTo: returnTo ?? null,
     }),
 
-  selectFromPokedex: (creature) => {
+  selectFromPokedex: (entry) => {
     const { currentPlayer, pokedexReturnTo } = get();
+    const { id, created_at, wins, evolution_threshold, evolved, losses, ...creature } = entry;
     if (currentPlayer === 1) {
       set({
         player1Creature: creature,
+        player1PokedexId: id,
         currentPlayer: 2,
         currentScreen: 'creation',
         pokedexReturnTo: null,
@@ -111,6 +120,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     } else {
       set({
         player2Creature: creature,
+        player2PokedexId: id,
         pokedexReturnTo: null,
       });
       // Both creatures ready — trigger battle creation
@@ -225,6 +235,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       creature1State: null,
       creature2State: null,
       winner: null,
+      player1PokedexId: null,
+      player2PokedexId: null,
       pokedexReturnTo: null,
     }),
 }));
