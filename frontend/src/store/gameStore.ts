@@ -63,6 +63,7 @@ interface GameState {
   addDisplayedEvent: (event: BattleEvent) => void;
   clearDisplayedEvents: () => void;
   applyDamageToCreature: (target: 1 | 2, damage: number) => void;
+  applyStatusToCreature: (target: 1 | 2, status: string) => void;
   applyPendingCreatureStates: () => void;
   resetGame: () => void;
 }
@@ -242,6 +243,15 @@ export const useGameStore = create<GameState>((set, get) => ({
           current_hp: Math.max(0, state.creature2State.current_hp - damage),
         },
       });
+    }
+  },
+
+  applyStatusToCreature: (target, status) => {
+    const state = get();
+    if (target === 1 && state.creature1State) {
+      set({ creature1State: { ...state.creature1State, status } });
+    } else if (target === 2 && state.creature2State) {
+      set({ creature2State: { ...state.creature2State, status } });
     }
   },
 

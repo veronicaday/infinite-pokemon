@@ -58,6 +58,10 @@ class BattleEngine:
                 else:
                     attacker.turns_asleep += 1
 
+            # Scared always wears off after the turn
+            if attacker.status == StatusEffect.SCARED:
+                attacker.status = None
+
             if not able:
                 events.append(BattleEvent("status", attacker_id, f"{attacker.name} {status_msg}"))
                 # Confusion self-damage
@@ -186,26 +190,47 @@ class BattleEngine:
             "poison": StatusEffect.POISON,
             "sleep": StatusEffect.SLEEP,
             "confuse": StatusEffect.CONFUSE,
+            "scared": StatusEffect.SCARED,
+        }
+
+        status_emoji = {
+            "burn": "🔥", "freeze": "🧊", "paralyze": "⚡",
+            "poison": "🤢", "sleep": "💤", "confuse": "💫",
+            "scared": "👻",
+        }
+
+        status_verb = {
+            "burn": "burned", "freeze": "frozen", "paralyze": "paralyzed",
+            "poison": "poisoned", "sleep": "put to sleep", "confuse": "confused",
+            "scared": "scared",
         }
 
         if effect in status_map:
             if defender.status is None:
                 defender.status = status_map[effect]
-                events.append(BattleEvent("status", defender_id, f"{defender.name} was {effect}ed!"))
+                emoji = status_emoji.get(effect, "")
+                verb = status_verb.get(effect, f"{effect}ed")
+                events.append(BattleEvent("status", defender_id, f"{defender.name} was {verb}! {emoji}"))
             else:
                 events.append(BattleEvent("message", defender_id, f"It had no effect on {defender.name}..."))
             return events
 
         # Stat changes
+        stat_display = {
+            "attack": "Attack", "defense": "Defense", "sp_attack": "Sp. Attack",
+            "sp_defense": "Sp. Defense", "speed": "Speed", "hp": "HP",
+        }
         if effect.startswith("raise_"):
             stat = effect[6:]
             target = self.creatures[attacker_id]
             target.stat_modifiers[stat] = min(6, target.stat_modifiers.get(stat, 0) + 1)
-            events.append(BattleEvent("stat_change", attacker_id, f"{target.name}'s {stat} rose!"))
+            display = stat_display.get(stat, stat)
+            events.append(BattleEvent("stat_change", attacker_id, f"{target.name}'s {display} rose! ⬆️"))
         elif effect.startswith("lower_"):
             stat = effect[6:]
             defender.stat_modifiers[stat] = max(-6, defender.stat_modifiers.get(stat, 0) - 1)
-            events.append(BattleEvent("stat_change", defender_id, f"{defender.name}'s {stat} fell!"))
+            display = stat_display.get(stat, stat)
+            events.append(BattleEvent("stat_change", defender_id, f"{defender.name}'s {display} fell! ⬇️"))
 
         return events
 

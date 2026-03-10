@@ -24,6 +24,16 @@ import {
   sfxStatus,
 } from '../audio/soundEngine';
 
+const STATUS_EMOJI: Record<string, string> = {
+  burn: '🔥',
+  freeze: '🧊',
+  paralyze: '⚡',
+  poison: '🤢',
+  sleep: '💤',
+  confuse: '💫',
+  scared: '👻',
+};
+
 export default function BattleScreen() {
   const {
     battlePhase,
@@ -36,6 +46,7 @@ export default function BattleScreen() {
     displayedEvents,
     addDisplayedEvent,
     applyDamageToCreature,
+    applyStatusToCreature,
     applyPendingCreatureStates,
     winner,
     resetGame,
@@ -135,6 +146,17 @@ export default function BattleScreen() {
         timeoutId = setTimeout(showNextEvent, 900);
       } else if (event.event_type === 'status') {
         sfxStatus();
+        // If a status was applied (e.g. "was burned!"), update creature display immediately
+        const statusMatch = event.message.match(/was (burned|frozen|paralyzed|poisoned|put to sleep|confused|scared)/i);
+        if (statusMatch && event.actor) {
+          const verbToStatus: Record<string, string> = {
+            burned: 'burn', frozen: 'freeze', paralyzed: 'paralyze',
+            poisoned: 'poison', 'put to sleep': 'sleep', confused: 'confuse',
+            scared: 'scared',
+          };
+          const status = verbToStatus[statusMatch[1].toLowerCase()] || statusMatch[1].toLowerCase();
+          applyStatusToCreature(event.actor as 1 | 2, status);
+        }
         currentIndex++;
         timeoutId = setTimeout(showNextEvent, 900);
       } else {
@@ -253,7 +275,7 @@ export default function BattleScreen() {
             </div>
             {c2.status && (
               <div style={{ color: '#ff6464', fontSize: 13, marginTop: 4 }}>
-                {c2.status.toUpperCase()}
+                {STATUS_EMOJI[c2.status] || ''} {c2.status.toUpperCase()}
               </div>
             )}
             <div style={{ marginTop: 6, display: 'flex', justifyContent: 'flex-end' }}>
@@ -303,7 +325,7 @@ export default function BattleScreen() {
             </div>
             {c1.status && (
               <div style={{ color: '#ff6464', fontSize: 13, marginTop: 4 }}>
-                {c1.status.toUpperCase()}
+                {STATUS_EMOJI[c1.status] || ''} {c1.status.toUpperCase()}
               </div>
             )}
             <div style={{ marginTop: 6 }}>

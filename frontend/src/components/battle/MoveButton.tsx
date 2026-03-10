@@ -38,10 +38,28 @@ export default function MoveButton({ move, onClick }: MoveButtonProps) {
       <div>{move.name}</div>
       <div style={{ fontSize: 11, opacity: 0.8, marginTop: 2 }}>
         PWR:{move.power} ACC:{move.accuracy}
-        {move.effect && ` [${move.effect} ${move.effect_chance}%]`}
+        {move.effect && ` [${formatEffect(move.effect)} ${move.effect_chance}%]`}
       </div>
     </button>
   );
+}
+
+const STAT_DISPLAY: Record<string, string> = {
+  attack: 'ATK', defense: 'DEF', sp_attack: 'SpATK',
+  sp_defense: 'SpDEF', speed: 'SPD', hp: 'HP',
+};
+
+function formatEffect(effect: string): string {
+  if (effect.startsWith('raise_')) {
+    const stat = effect.slice(6);
+    return `↑${STAT_DISPLAY[stat] || stat}`;
+  }
+  if (effect.startsWith('lower_')) {
+    const stat = effect.slice(6);
+    return `↓${STAT_DISPLAY[stat] || stat}`;
+  }
+  // Status effects: burn, poison, etc.
+  return effect.charAt(0).toUpperCase() + effect.slice(1);
 }
 
 function darkenHex(hex: string, amount: number): string {

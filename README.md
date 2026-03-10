@@ -74,7 +74,7 @@ Players provide a text description and select 1–2 types. Claude generates the 
 
 - Speed determines turn order
 - Damage formula accounts for attack/defense, type effectiveness, and STAB (1.5x for same-type moves)
-- Status effects: burn, paralyze, freeze, poison, sleep, confuse
+- Status effects: burn, paralyze, freeze, poison, sleep, confuse, scared (Ghost-type exclusive)
 - Stat stage modifiers (-6 to +6) from status moves
 - Move animations are type-specific with particle effects
 

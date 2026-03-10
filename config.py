@@ -35,6 +35,7 @@ EFFECT_BUDGET_VALUES = {
     "poison": 20,
     "sleep": 35,
     "confuse": 25,
+    "scared": 20,
     "raise_attack": 15,
     "raise_defense": 15,
     "raise_sp_attack": 15,

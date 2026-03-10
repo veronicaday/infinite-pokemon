@@ -18,6 +18,7 @@ export const colors = {
   title: '#ffdc50',
   subtitle: '#b4b4dc',
   error: '#dc3232',
+  surface: '#22222e',
 };
 
 export const typeColors: Record<string, string> = {

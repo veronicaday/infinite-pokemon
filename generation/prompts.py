@@ -26,11 +26,12 @@ Each creature has exactly 4 moves. Each move has:
 - category: "physical", "special", or "status"
 - power: 0 for status moves, 20-120 for attacks
 - accuracy: 50-100
-- effect: Optional status effect or stat change. One of: burn, freeze, paralyze, poison, sleep, confuse, raise_attack, raise_defense, raise_sp_attack, raise_sp_defense, raise_speed, lower_attack, lower_defense, lower_sp_attack, lower_sp_defense, lower_speed
+- effect: Optional status effect or stat change. One of: burn, freeze, paralyze, poison, sleep, confuse, scared, raise_attack, raise_defense, raise_sp_attack, raise_sp_defense, raise_speed, lower_attack, lower_defense, lower_sp_attack, lower_sp_defense, lower_speed
 - effect_chance: 0-100 (probability the effect triggers)
 
 **Move Power Budget**: For each move, power + accuracy + (effect_value * effect_chance/100) must not exceed 160.
-Effect values: burn=30, paralyze=35, freeze=40, poison=20, sleep=35, confuse=25, stat changes=15.
+Effect values: burn=30, paralyze=35, freeze=40, poison=20, sleep=35, confuse=25, scared=20, stat changes=15.
+Note: "scared" is a Ghost-themed effect — use it on Ghost-type moves. It may prevent the target from moving for one turn.
 
 Example: A move with 80 power, 80 accuracy = 160 budget (no room for effects).
 Example: A move with 60 power, 85 accuracy, burn at 20% chance = 60 + 85 + (30*0.20) = 151 budget. OK!
