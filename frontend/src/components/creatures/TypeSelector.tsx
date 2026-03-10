@@ -15,10 +15,7 @@ interface TypeSelectorProps {
 export default function TypeSelector({ selected, onChange }: TypeSelectorProps) {
   const toggle = (type: string) => {
     if (selected.includes(type)) {
-      // Don't allow deselecting if it's the only one
-      if (selected.length > 1) {
-        onChange(selected.filter((t) => t !== type));
-      }
+      onChange(selected.filter((t) => t !== type));
     } else if (selected.length < 2) {
       onChange([...selected, type]);
     }

@@ -26,7 +26,7 @@ class CreatureGenerator:
         user_prompt = build_user_prompt(description, stat_dict)
 
         message = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-opus-4-6",
             max_tokens=1024,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
@@ -46,7 +46,7 @@ class CreatureGenerator:
         user_prompt = build_sprite_prompt(name, description, types, stats)
 
         message = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model="claude-opus-4-6",
             max_tokens=16000,
             system=SPRITE_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],

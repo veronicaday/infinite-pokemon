@@ -106,7 +106,7 @@ export default function CreationScreen() {
   } = useGameStore();
 
   const [description, setDescription] = useState('');
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(['Normal']);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
   const [preview, setPreview] = useState<CreatureData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +157,7 @@ export default function CreationScreen() {
     if (currentPlayer === 1) {
       // Reset form for player 2
       setDescription('');
-      setSelectedTypes(['Normal']);
+      setSelectedTypes([]);
       setStats(DEFAULT_STATS);
       setPreview(null);
       setError(null);
@@ -183,13 +183,23 @@ export default function CreationScreen() {
           Player {currentPlayer} — Create Your Creature
         </h2>
 
-        {/* Description */}
+        {/* Description + Random */}
         <div>
-          <label
-            style={{ display: 'block', color: colors.textDim, fontSize: 14, marginBottom: 6 }}
-          >
-            Describe your creature:
-          </label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <label style={{ color: colors.textDim, fontSize: 14 }}>
+              Describe your creature:
+            </label>
+            <Button
+              label="Random!"
+              onClick={handleRandom}
+              disabled={isGenerating}
+              color="#a855f7"
+              hoverColor="#c084fc"
+              fontSize={13}
+              width={90}
+              height={30}
+            />
+          </div>
           <input
             type="text"
             value={description}
@@ -231,15 +241,6 @@ export default function CreationScreen() {
             hoverColor={colors.accentHover}
             fontSize={16}
             width={200}
-          />
-          <Button
-            label="Random!"
-            onClick={handleRandom}
-            disabled={isGenerating}
-            color="#a855f7"
-            hoverColor="#c084fc"
-            fontSize={16}
-            width={120}
           />
           <Button
             label="Ready!"
