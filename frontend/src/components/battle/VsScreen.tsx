@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { colors } from '../../styles/theme';
 import { typeColors } from '../../styles/theme';
+import { sfxVsClash } from '../../audio/soundEngine';
 import type { CreatureData } from '../../types/game';
 import CreatureSprite from '../creatures/CreatureSprite';
 import TypeBadge from '../ui/TypeBadge';
@@ -18,7 +19,7 @@ export default function VsScreen({ creature1, creature2, onComplete }: VsScreenP
 
   useEffect(() => {
     const timers = [
-      setTimeout(() => setPhase('clash'), 600),
+      setTimeout(() => { setPhase('clash'); sfxVsClash(); }, 600),
       setTimeout(() => setPhase('exit'), 2400),
       setTimeout(onComplete, 3200),
     ];

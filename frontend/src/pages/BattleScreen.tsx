@@ -12,6 +12,17 @@ import MoveAnimation from '../components/battle/MoveAnimation';
 import VsScreen from '../components/battle/VsScreen';
 import Button from '../components/ui/Button';
 import GeneratingSpinner from '../components/ui/GeneratingSpinner';
+import {
+  sfxHit,
+  sfxSpecialHit,
+  sfxSuperEffective,
+  sfxNotEffective,
+  sfxMiss,
+  sfxFaint,
+  sfxVictory,
+  sfxEvolve,
+  sfxStatus,
+} from '../audio/soundEngine';
 
 export default function BattleScreen() {
   const {
@@ -62,6 +73,7 @@ export default function BattleScreen() {
         // All events shown — apply final creature states and advance phase
         applyPendingCreatureStates();
         if (useGameStore.getState().winner) {
+          sfxVictory();
           setBattlePhase('result');
         } else {
           setBattlePhase('gate_p1');
@@ -82,14 +94,36 @@ export default function BattleScreen() {
         timeoutId = setTimeout(() => {
           if (cancelled) return;
           if (event.damage > 0) {
+            // Play hit sound based on move category
+            const moveCategory = event.move_type;
+            const isSpecial = ['psychic', 'fire', 'water', 'ice', 'electric', 'ghost', 'dragon', 'dark', 'fairy', 'cosmic', 'digital'].includes(moveCategory);
+            if (isSpecial) sfxSpecialHit(); else sfxHit();
             applyDamageToCreature(target as 1 | 2, event.damage);
+          } else {
+            sfxMiss();
           }
           currentIndex++;
           // Brief pause before next event
           timeoutId = setTimeout(showNextEvent, 500);
         }, 1200);
+      } else if (event.event_type === 'effectiveness') {
+        if (event.effectiveness && event.effectiveness > 1) {
+          sfxSuperEffective();
+        } else if (event.effectiveness && event.effectiveness < 1) {
+          sfxNotEffective();
+        }
+        currentIndex++;
+        timeoutId = setTimeout(showNextEvent, 900);
+      } else if (event.event_type === 'faint') {
+        sfxFaint();
+        currentIndex++;
+        timeoutId = setTimeout(showNextEvent, 900);
+      } else if (event.event_type === 'status') {
+        sfxStatus();
+        currentIndex++;
+        timeoutId = setTimeout(showNextEvent, 900);
       } else {
-        // Non-move event (effectiveness, status, faint, etc.) — short delay
+        // Other non-move events — short delay
         currentIndex++;
         timeoutId = setTimeout(showNextEvent, 900);
       }
@@ -415,6 +449,7 @@ export default function BattleScreen() {
                   label="Evolve!"
                   onClick={async () => {
                     setIsEvolving(true);
+                    sfxEvolve();
                     try {
                       await api.evolveCreature(evolvePrompt.id);
                       setEvolvePrompt(null);

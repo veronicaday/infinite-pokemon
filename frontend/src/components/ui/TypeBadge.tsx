@@ -1,4 +1,4 @@
-import { typeColors } from '../../styles/theme';
+import { typeColors, typeTextColors } from '../../styles/theme';
 
 interface TypeBadgeProps {
   type: string;
@@ -23,7 +23,7 @@ export default function TypeBadge({
       style={{
         display: 'inline-block',
         background: selected === false ? '#2a2a3a' : color,
-        color: '#fff',
+        color: typeTextColors[type] || '#fff',
         fontSize,
         fontWeight: 600,
         padding,

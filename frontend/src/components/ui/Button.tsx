@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { colors } from '../../styles/theme';
+import { sfxClick } from '../../audio/soundEngine';
 
 interface ButtonProps {
   label: string;
@@ -28,7 +29,7 @@ export default function Button({
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => { sfxClick(); onClick(); }}
       disabled={disabled}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}

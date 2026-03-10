@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { MoveData } from '../../types/game';
-import { typeColors } from '../../styles/theme';
+import { typeColors, typeTextColors } from '../../styles/theme';
+import { sfxSelect } from '../../audio/soundEngine';
 
 interface MoveButtonProps {
   move: MoveData;
@@ -16,12 +17,12 @@ export default function MoveButton({ move, onClick }: MoveButtonProps) {
 
   return (
     <button
-      onClick={onClick}
+      onClick={() => { sfxSelect(); onClick(); }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         background: bg,
-        color: '#fff',
+        color: typeTextColors[move.type] || '#fff',
         border: 'none',
         borderRadius: 8,
         padding: '10px 16px',

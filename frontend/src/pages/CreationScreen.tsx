@@ -8,8 +8,8 @@ import StatSliders from '../components/creatures/StatSliders';
 import CreatureSprite from '../components/creatures/CreatureSprite';
 import TypeBadge from '../components/ui/TypeBadge';
 import { STAT_LABELS } from '../types/game';
-import CreatureCard from '../components/creatures/CreatureCard';
 import GeneratingSpinner from '../components/ui/GeneratingSpinner';
+import { sfxGenComplete } from '../audio/soundEngine';
 
 const DEFAULT_STATS: Stats = {
   hp: 100,
@@ -132,6 +132,7 @@ export default function CreationScreen() {
     try {
       const creature = await generateCreature(concept, types, randStats);
       setPreview(creature);
+      sfxGenComplete();
     } catch {
       // Error handled by store
     }
@@ -150,6 +151,7 @@ export default function CreationScreen() {
     try {
       const creature = await generateCreature(description, selectedTypes, stats);
       setPreview(creature);
+      sfxGenComplete();
     } catch {
       // Error handled by store
     }
@@ -193,44 +195,30 @@ export default function CreationScreen() {
           <label style={{ color: colors.textDim, fontSize: 14, display: 'block', marginBottom: 6 }}>
             Describe your creature:
           </label>
-          <div style={{ position: 'relative' }}>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="A crystal dragon that controls sound waves..."
-              maxLength={300}
-              style={{
-                width: '100%',
-                padding: '10px 100px 10px 14px',
-                background: colors.inputBg,
-                border: `2px solid ${colors.inputBorder}`,
-                borderRadius: 8,
-                color: colors.text,
-                fontSize: 15,
-                outline: 'none',
-                boxSizing: 'border-box',
-              }}
-              onFocus={(e) =>
-                (e.target.style.borderColor = colors.accent)
-              }
-              onBlur={(e) =>
-                (e.target.style.borderColor = colors.inputBorder)
-              }
-            />
-            <div style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)' }}>
-              <Button
-                label="Random!"
-                onClick={handleRandom}
-                disabled={isGenerating}
-                color="#a855f7"
-                hoverColor="#c084fc"
-                fontSize={13}
-                width={86}
-                height={30}
-              />
-            </div>
-          </div>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="A crystal dragon that controls sound waves..."
+            maxLength={300}
+            style={{
+              width: '100%',
+              padding: '10px 14px',
+              background: colors.inputBg,
+              border: `2px solid ${colors.inputBorder}`,
+              borderRadius: 8,
+              color: colors.text,
+              fontSize: 15,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+            onFocus={(e) =>
+              (e.target.style.borderColor = colors.accent)
+            }
+            onBlur={(e) =>
+              (e.target.style.borderColor = colors.inputBorder)
+            }
+          />
         </div>
 
         {/* Type selector */}
@@ -349,26 +337,42 @@ export default function CreationScreen() {
             {isGenerating ? (
               <GeneratingSpinner />
             ) : (
-              <p style={{ fontSize: 16 }}>Your creature will appear here</p>
+              <>
+                <p style={{ fontSize: 16 }}>Your creature will appear here!</p>
+                <div style={{ marginTop: 16, display: 'flex', justifyContent: 'center' }}>
+                  <Button
+                    label="Random!"
+                    onClick={handleRandom}
+                    disabled={isGenerating}
+                    color="#a855f7"
+                    hoverColor="#c084fc"
+                    fontSize={16}
+                    width={140}
+                    height={42}
+                  />
+                </div>
+              </>
             )}
           </div>
         )}
       </div>
 
-      {/* Show P1's creature in corner when creating P2 */}
+      {/* Show P1's sprite in corner when creating P2 */}
       {currentPlayer === 2 && player1Creature && (
         <div
           style={{
             position: 'absolute',
             bottom: 16,
             right: 16,
-            opacity: 0.7,
-            transform: 'scale(0.7)',
-            transformOrigin: 'bottom right',
+            opacity: 0.5,
             pointerEvents: 'none' as const,
+            textAlign: 'center',
           }}
         >
-          <CreatureCard creature={player1Creature} size="sm" />
+          <CreatureSprite creature={player1Creature} size={90} />
+          <div style={{ fontSize: 11, color: colors.textDim, marginTop: 2 }}>
+            {player1Creature.name}
+          </div>
         </div>
       )}
     </div>
