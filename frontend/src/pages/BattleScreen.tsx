@@ -11,6 +11,7 @@ import TurnGate from '../components/battle/TurnGate';
 import MoveAnimation from '../components/battle/MoveAnimation';
 import VsScreen from '../components/battle/VsScreen';
 import Button from '../components/ui/Button';
+import GeneratingSpinner from '../components/ui/GeneratingSpinner';
 
 export default function BattleScreen() {
   const {
@@ -105,13 +106,17 @@ export default function BattleScreen() {
   // Record win for the winning creature's Pokedex entry
   useEffect(() => {
     if (!winner) return;
+    let evolveTimeout: ReturnType<typeof setTimeout>;
     const winnerPokedexId = winner === 1
       ? useGameStore.getState().player1PokedexId
       : useGameStore.getState().player2PokedexId;
     if (winnerPokedexId) {
       api.recordWin(winnerPokedexId).then((updated) => {
         if (!updated.evolved && updated.wins >= updated.evolution_threshold) {
-          setEvolvePrompt({ id: updated.id, name: updated.name });
+          // Delay so the win screen shows first
+          evolveTimeout = setTimeout(() => {
+            setEvolvePrompt({ id: updated.id, name: updated.name });
+          }, 2500);
         }
       }).catch(console.error);
     }
@@ -122,6 +127,7 @@ export default function BattleScreen() {
     if (loserPokedexId) {
       api.recordLoss(loserPokedexId).catch(console.error);
     }
+    return () => clearTimeout(evolveTimeout);
   }, [winner]);
 
   const handleMoveSelect = useCallback(
@@ -399,7 +405,10 @@ export default function BattleScreen() {
               is ready to evolve!
             </p>
             {isEvolving ? (
-              <p style={{ color: '#f0c040', fontSize: 16 }}>Evolving...</p>
+              <GeneratingSpinner
+                message="Evolving..."
+                subtitle="Generating evolved form & sprite"
+              />
             ) : (
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
                 <Button
