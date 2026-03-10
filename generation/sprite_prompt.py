@@ -11,9 +11,11 @@ Given a creature description, types, and stats, create a detailed, polished SVG 
 
 ## SVG Technical Rules
 - Output ONLY the raw SVG markup — no markdown, no explanation
-- Use viewBox="0 0 200 200"
+- Use viewBox="0 0 600 600"
 - Do NOT include <script>, onclick, <image>, xlink:href, XML declarations, or DOCTYPE
-- SVG should be under 8000 characters
+- Do NOT add a background rectangle, name/title text, or type badge labels — the game UI handles those
+- The SVG canvas should contain ONLY the creature itself (with its shadow, aura, and effects)
+- SVG can be up to 12000 characters — use the space for detail
 
 ## Techniques to Use (these make sprites look great)
 - **Layered gradients**: Use <linearGradient> and <radialGradient> for body shading, giving depth and volume. Layer multiple gradients for richer color.
@@ -86,7 +88,7 @@ def build_sprite_prompt(
     lowest_stat = min(stats, key=lambda k: stats[k])
 
     # Build stat profile description
-    strong_stats = [k for k, v in stats.items() if v >= 65]
+    strong_stats = [k for k, v in stats.items() if v >= 130]
     stat_profile = ""
     if strong_stats:
         stat_profile = f"Strong in: {', '.join(strong_stats)}. "

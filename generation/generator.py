@@ -47,7 +47,7 @@ class CreatureGenerator:
 
         message = self.client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=8192,
+            max_tokens=16000,
             system=SPRITE_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
         )
