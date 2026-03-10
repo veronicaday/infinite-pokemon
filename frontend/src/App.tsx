@@ -3,6 +3,7 @@ import { useGameStore } from './store/gameStore';
 import MainMenu from './pages/MainMenu';
 import CreationScreen from './pages/CreationScreen';
 import BattleScreen from './pages/BattleScreen';
+import PokedexScreen from './pages/PokedexScreen';
 
 export default function App() {
   const currentScreen = useGameStore((s) => s.currentScreen);
@@ -17,6 +18,7 @@ export default function App() {
       {currentScreen === 'menu' && <MainMenu />}
       {currentScreen === 'creation' && <CreationScreen />}
       {currentScreen === 'battle' && <BattleScreen />}
+      {currentScreen === 'pokedex' && <PokedexScreen />}
     </div>
   );
 }

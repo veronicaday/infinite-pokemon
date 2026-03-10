@@ -39,6 +39,7 @@ export default function BattleScreen() {
     key: number;
   } | null>(null);
   const animKeyRef = useRef(0);
+  const [showForfeit, setShowForfeit] = useState(false);
 
   // Animate battle events one by one
   useEffect(() => {
@@ -103,6 +104,21 @@ export default function BattleScreen() {
         position: 'relative',
       }}
     >
+      {/* Exit button */}
+      {battlePhase !== 'result' && battlePhase !== 'vs' && (
+        <div style={{ position: 'absolute', top: 16, right: 16, zIndex: 15 }}>
+          <Button
+            label="Exit"
+            onClick={() => setShowForfeit(true)}
+            color={colors.button}
+            hoverColor={colors.buttonHover}
+            fontSize={14}
+            width={80}
+            height={34}
+          />
+        </div>
+      )}
+
       {/* Arena: both creatures facing off */}
       <div
         style={{
@@ -194,6 +210,7 @@ export default function BattleScreen() {
       </div>
 
       {/* Battle log */}
+      <div style={{ marginTop: 24 }} />
       <BattleLog events={displayedEvents} />
 
       {/* Move selection */}
@@ -289,6 +306,61 @@ export default function BattleScreen() {
             width={200}
             height={52}
           />
+        </div>
+      )}
+
+      {/* Forfeit confirmation modal */}
+      {showForfeit && (
+        <div
+          onClick={() => setShowForfeit(false)}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 30,
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: colors.surface,
+              border: `2px solid ${colors.panelBorder}`,
+              borderRadius: 16,
+              padding: 32,
+              textAlign: 'center',
+              maxWidth: 380,
+            }}
+          >
+            <p style={{ fontSize: 20, fontWeight: 700, margin: '0 0 8px', color: colors.text }}>
+              Are you sure you want to forfeit?
+            </p>
+            <p style={{ fontSize: 14, color: colors.textDim, margin: '0 0 24px' }}>
+              The battle will be abandoned.
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+              <Button
+                label="Keep Fighting"
+                onClick={() => setShowForfeit(false)}
+                color={colors.accent}
+                hoverColor={colors.accentHover}
+                fontSize={15}
+                width={140}
+                height={42}
+              />
+              <Button
+                label="Forfeit"
+                onClick={resetGame}
+                color="#dc3c3c"
+                hoverColor="#ff5555"
+                fontSize={15}
+                width={120}
+                height={42}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

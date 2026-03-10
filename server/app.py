@@ -3,9 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import STAT_BUDGET, MIN_STAT, MAX_STAT, STAT_NAMES
 from core.types import Type, TYPE_COLORS, _EFFECTIVENESS
-from server.routes import creatures, battle
+from server.database import init_db
+from server.routes import creatures, battle, pokedex
 
 app = FastAPI(title="Infinite Pokemon API")
+
+
+@app.on_event("startup")
+def startup():
+    init_db()
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,6 +23,7 @@ app.add_middleware(
 
 app.include_router(creatures.router, prefix="/api/creatures", tags=["creatures"])
 app.include_router(battle.router, prefix="/api/battle", tags=["battle"])
+app.include_router(pokedex.router, prefix="/api/pokedex", tags=["pokedex"])
 
 
 def _rgb_to_hex(rgb: tuple[int, int, int]) -> str:

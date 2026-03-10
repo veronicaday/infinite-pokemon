@@ -106,6 +106,7 @@ export default function CreationScreen() {
     confirmCreature,
     createBattle,
     player1Creature,
+    openPokedex,
   } = useGameStore();
 
   const [description, setDescription] = useState('');
@@ -188,44 +189,47 @@ export default function CreationScreen() {
 
         {/* Description + Random */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <label style={{ color: colors.textDim, fontSize: 14 }}>
-              Describe your creature:
-            </label>
-            <Button
-              label="Random!"
-              onClick={handleRandom}
-              disabled={isGenerating}
-              color="#a855f7"
-              hoverColor="#c084fc"
-              fontSize={13}
-              width={90}
-              height={30}
+          <label style={{ color: colors.textDim, fontSize: 14, display: 'block', marginBottom: 6 }}>
+            Describe your creature:
+          </label>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="A crystal dragon that controls sound waves..."
+              maxLength={300}
+              style={{
+                width: '100%',
+                padding: '10px 100px 10px 14px',
+                background: colors.inputBg,
+                border: `2px solid ${colors.inputBorder}`,
+                borderRadius: 8,
+                color: colors.text,
+                fontSize: 15,
+                outline: 'none',
+                boxSizing: 'border-box',
+              }}
+              onFocus={(e) =>
+                (e.target.style.borderColor = colors.accent)
+              }
+              onBlur={(e) =>
+                (e.target.style.borderColor = colors.inputBorder)
+              }
             />
+            <div style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)' }}>
+              <Button
+                label="Random!"
+                onClick={handleRandom}
+                disabled={isGenerating}
+                color="#a855f7"
+                hoverColor="#c084fc"
+                fontSize={13}
+                width={86}
+                height={30}
+              />
+            </div>
           </div>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="A crystal dragon that controls sound waves..."
-            maxLength={300}
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              background: colors.inputBg,
-              border: `2px solid ${colors.inputBorder}`,
-              borderRadius: 8,
-              color: colors.text,
-              fontSize: 15,
-              outline: 'none',
-            }}
-            onFocus={(e) =>
-              (e.target.style.borderColor = colors.accent)
-            }
-            onBlur={(e) =>
-              (e.target.style.borderColor = colors.inputBorder)
-            }
-          />
         </div>
 
         {/* Type selector */}
@@ -251,6 +255,19 @@ export default function CreationScreen() {
             disabled={!preview}
             fontSize={16}
             width={140}
+          />
+        </div>
+
+        {/* Pokedex shortcut */}
+        <div style={{ marginTop: 8 }}>
+          <Button
+            label="Choose from Pokedex"
+            onClick={() => openPokedex('creation')}
+            color={colors.button}
+            hoverColor={colors.buttonHover}
+            fontSize={14}
+            width={200}
+            height={38}
           />
         </div>
 

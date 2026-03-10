@@ -1,4 +1,4 @@
-import type { GameConfig, CreatureData, Stats, BattleEvent } from '../types/game';
+import type { GameConfig, CreatureData, Stats, BattleEvent, PokedexEntry } from '../types/game';
 
 const BASE = '/api';
 
@@ -68,4 +68,25 @@ export async function executeTurn(
       move2_index: move2Index,
     }),
   });
+}
+
+// --- Pokedex ---
+
+export async function getPokedex(): Promise<PokedexEntry[]> {
+  return request<PokedexEntry[]>('/pokedex');
+}
+
+export async function getPokedexEntry(id: string): Promise<PokedexEntry> {
+  return request<PokedexEntry>(`/pokedex/${id}`);
+}
+
+export async function saveToPokedex(creature: CreatureData): Promise<PokedexEntry> {
+  return request<PokedexEntry>('/pokedex', {
+    method: 'POST',
+    body: JSON.stringify(creature),
+  });
+}
+
+export async function deleteFromPokedex(id: string): Promise<void> {
+  await request<void>(`/pokedex/${id}`, { method: 'DELETE' });
 }

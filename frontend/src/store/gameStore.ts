@@ -34,10 +34,15 @@ interface GameState {
   creature2State: CreatureData | null;
   winner: number | null;
 
+  // Pokedex selection mode: which player triggered pokedex from creation
+  pokedexReturnTo: Screen | null;
+
   // Actions
   loadConfig: () => Promise<void>;
   setScreen: (screen: Screen) => void;
   startNewGame: () => void;
+  openPokedex: (returnTo?: Screen) => void;
+  selectFromPokedex: (creature: CreatureData) => void;
   generateCreature: (
     description: string,
     types: string[],
@@ -70,6 +75,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   creature1State: null,
   creature2State: null,
   winner: null,
+  pokedexReturnTo: null,
 
   loadConfig: async () => {
     const config = await api.getConfig();
@@ -86,6 +92,31 @@ export const useGameStore = create<GameState>((set, get) => ({
       player2Creature: null,
       generationError: null,
     }),
+
+  openPokedex: (returnTo) =>
+    set({
+      currentScreen: 'pokedex',
+      pokedexReturnTo: returnTo ?? null,
+    }),
+
+  selectFromPokedex: (creature) => {
+    const { currentPlayer, pokedexReturnTo } = get();
+    if (currentPlayer === 1) {
+      set({
+        player1Creature: creature,
+        currentPlayer: 2,
+        currentScreen: 'creation',
+        pokedexReturnTo: null,
+      });
+    } else {
+      set({
+        player2Creature: creature,
+        pokedexReturnTo: null,
+      });
+      // Both creatures ready — trigger battle creation
+      get().createBattle();
+    }
+  },
 
   generateCreature: async (description, types, statPreferences) => {
     set({ isGenerating: true, generationError: null });
@@ -194,5 +225,6 @@ export const useGameStore = create<GameState>((set, get) => ({
       creature1State: null,
       creature2State: null,
       winner: null,
+      pokedexReturnTo: null,
     }),
 }));

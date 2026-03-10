@@ -5,6 +5,7 @@ import { useGameStore } from '../store/gameStore';
 
 export default function MainMenu() {
   const startNewGame = useGameStore((s) => s.startNewGame);
+  const openPokedex = useGameStore((s) => s.openPokedex);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Floating particles background
@@ -88,7 +89,7 @@ export default function MainMenu() {
         >
           Create your creature. Battle your friends.
         </p>
-        <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
           <Button
             label="New Game"
             onClick={startNewGame}
@@ -97,6 +98,15 @@ export default function MainMenu() {
             fontSize={20}
             width={200}
             height={56}
+          />
+          <Button
+            label="Pokedex"
+            onClick={() => openPokedex()}
+            color={colors.button}
+            hoverColor={colors.buttonHover}
+            fontSize={18}
+            width={200}
+            height={48}
           />
         </div>
       </div>

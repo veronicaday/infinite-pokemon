@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from core.stats import Stats
 from generation.generator import CreatureGenerator
+from server.database import save_creature
 from server.models import CreatureCreateRequest, CreatureSchema, creature_to_schema
 
 router = APIRouter()
@@ -80,6 +81,12 @@ async def generate_creature(request: CreatureCreateRequest):
             schema.sprite_svg = None
         else:
             schema.sprite_svg = sprite_svg
+
+        # Auto-save to pokedex
+        try:
+            save_creature(schema)
+        except Exception:
+            pass  # Don't fail generation if save fails
 
         return schema
 

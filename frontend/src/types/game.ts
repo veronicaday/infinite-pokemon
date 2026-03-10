@@ -51,7 +51,12 @@ export interface GameConfig {
   types: TypeInfo[];
 }
 
-export type Screen = 'menu' | 'creation' | 'battle';
+export interface PokedexEntry extends CreatureData {
+  id: string;
+  created_at: string;
+}
+
+export type Screen = 'menu' | 'creation' | 'battle' | 'pokedex';
 export type BattlePhase =
   | 'vs'
   | 'gate_p1'

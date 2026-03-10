@@ -38,6 +38,11 @@ class CreatureSchema(BaseModel):
     sprite_svg: str | None = None
 
 
+class PokedexEntry(CreatureSchema):
+    id: str
+    created_at: str
+
+
 class CreatureCreateRequest(BaseModel):
     description: str
     types: list[str] = Field(..., min_length=1, max_length=2)
