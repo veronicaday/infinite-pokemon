@@ -4,7 +4,7 @@ An AI-powered creature battle game where every creature is unique. Describe a cr
 
 ## Features
 
-- **AI Creature Generation** — Describe any creature and get a fully playable character with balanced stats, 4 themed moves, and a hand-drawn SVG sprite
+- **AI Creature Generation** — Describe any creature and get a fully playable character with balanced stats, 4 themed moves, and an AI-generated SVG sprite
 - **Turn-Based Battles** — 2-player battles with type effectiveness, STAB, status effects, and animated move visuals
 - **21 Types** — 18 classic types plus Cosmic, Sound, and Digital, with a full effectiveness chart
 - **Pokedex** — Save creatures, track win/loss records, and browse your collection
@@ -74,7 +74,7 @@ Players provide a text description and select 1–2 types. Claude generates the 
 
 - Speed determines turn order
 - Damage formula accounts for attack/defense, type effectiveness, and STAB (1.5x for same-type moves)
-- Status effects: burn, paralyze, freeze, poison, sleep, confuse, scared (Ghost-type exclusive)
+- Status effects: burn, paralyze, freeze, poison, sleep, confuse, scared (Ghost/Cosmic-type)
 - Stat stage modifiers (-6 to +6) from status moves
 - Move animations are type-specific with particle effects
 

@@ -31,7 +31,7 @@ Each creature has exactly 4 moves. Each move has:
 
 **Move Power Budget**: For each move, power + accuracy + (effect_value * effect_chance/100) must not exceed 160.
 Effect values: burn=30, paralyze=35, freeze=40, poison=20, sleep=35, confuse=25, scared=20, stat changes=15.
-Note: "scared" is a Ghost-themed effect — use it on Ghost-type moves. It may prevent the target from moving for one turn.
+Note: "scared" is a Ghost/Cosmic-themed effect — use it on Ghost-type or Cosmic-type moves. It may prevent the target from moving for one turn.
 
 Example: A move with 80 power, 80 accuracy = 160 budget (no room for effects).
 Example: A move with 60 power, 85 accuracy, burn at 20% chance = 60 + 85 + (30*0.20) = 151 budget. OK!
