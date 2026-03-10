@@ -8,6 +8,7 @@ from core.battle import BattleEngine
 @dataclass
 class BattleSession:
     engine: BattleEngine
+    sprite_svgs: dict[int, str | None] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
 
 

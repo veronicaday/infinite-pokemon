@@ -2,9 +2,9 @@ import { colors } from '../../styles/theme';
 import type { Stats } from '../../types/game';
 import { STAT_LABELS } from '../../types/game';
 
-const STAT_BUDGET = 300;
+const STAT_BUDGET = 600;
 const MIN_STAT = 20;
-const MAX_STAT = 100;
+const MAX_STAT = 200;
 const STAT_KEYS: (keyof Stats)[] = [
   'hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed',
 ];

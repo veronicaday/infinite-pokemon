@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { colors } from '../styles/theme';
+import { colors, typeColors } from '../styles/theme';
 import { useGameStore } from '../store/gameStore';
 import type { Stats, CreatureData } from '../types/game';
 import Button from '../components/ui/Button';
@@ -8,13 +8,91 @@ import StatSliders from '../components/creatures/StatSliders';
 import CreatureCard from '../components/creatures/CreatureCard';
 
 const DEFAULT_STATS: Stats = {
-  hp: 50,
-  attack: 50,
-  defense: 50,
-  sp_attack: 50,
-  sp_defense: 50,
-  speed: 50,
+  hp: 100,
+  attack: 100,
+  defense: 100,
+  sp_attack: 100,
+  sp_defense: 100,
+  speed: 100,
 };
+
+const ALL_TYPES = Object.keys(typeColors);
+
+const RANDOM_CONCEPTS = [
+  'A tiny lizard made of living lava rocks',
+  'An elegant swan with galaxies swirling in its feathers',
+  'A mushroom creature that floats using spore clouds',
+  'A clockwork owl with gear-shaped eyes',
+  'A wolf made of shifting shadows and red mist',
+  'A cheerful slime that mimics anything it eats',
+  'A coral golem that grows stronger in water',
+  'A moth with wings that display hypnotic patterns',
+  'A baby phoenix wrapped in its own embers',
+  'A crystal spider that weaves webs of light',
+  'A samurai beetle with razor-sharp horn blades',
+  'An ancient tortoise carrying a miniature forest on its shell',
+  'A fox made of crackling electricity',
+  'A jellyfish that drifts through the air trailing stardust',
+  'A stone gargoyle that comes to life at night',
+  'A serpent formed from intertwined vines and thorns',
+  'A playful otter with ice armor and a frozen tail',
+  'A dragon hatchling sneezing tiny fireballs',
+  'A floating book that summons words as weapons',
+  'A cat made of swirling purple smoke',
+  'A hermit crab using a skull as its shell',
+  'A hummingbird that moves faster than the eye can see',
+  'A bear cub made of living honey and bees',
+  'A knight made of sentient magnetic metal',
+  'A frog that sings devastating sonic blasts',
+  'A tree spirit with glowing sap running through its bark',
+  'A cybernetic shark with laser fins',
+  'A bunny with enormous ears that channel psychic energy',
+  'A chameleon that shifts between dimensions',
+  'A tiny dragon turtle with a volcano on its back',
+];
+
+const STAT_BUDGET = 600;
+const MIN_STAT = 20;
+const MAX_STAT = 200;
+
+function randomStats(): Stats {
+  const keys: (keyof Stats)[] = ['hp', 'attack', 'defense', 'sp_attack', 'sp_defense', 'speed'];
+  const stats: Stats = { hp: 50, attack: 50, defense: 50, sp_attack: 50, sp_defense: 50, speed: 50 };
+
+  // Generate random values, then normalize to budget
+  const raw = keys.map(() => MIN_STAT + Math.random() * (MAX_STAT - MIN_STAT));
+  const rawSum = raw.reduce((a, b) => a + b, 0);
+
+  keys.forEach((key, i) => {
+    stats[key] = Math.round((raw[i] / rawSum) * STAT_BUDGET);
+  });
+
+  // Clamp and fix rounding
+  keys.forEach((key) => {
+    stats[key] = Math.max(MIN_STAT, Math.min(MAX_STAT, stats[key]));
+  });
+
+  // Adjust to hit exact budget
+  let total = keys.reduce((sum, k) => sum + stats[k], 0);
+  while (total !== STAT_BUDGET) {
+    const idx = Math.floor(Math.random() * keys.length);
+    const key = keys[idx];
+    if (total < STAT_BUDGET && stats[key] < MAX_STAT) {
+      stats[key]++;
+      total++;
+    } else if (total > STAT_BUDGET && stats[key] > MIN_STAT) {
+      stats[key]--;
+      total--;
+    }
+  }
+
+  return stats;
+}
+
+function pickRandom<T>(arr: T[], count: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
 
 export default function CreationScreen() {
   const {
@@ -32,6 +110,27 @@ export default function CreationScreen() {
   const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
   const [preview, setPreview] = useState<CreatureData | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleRandom = async () => {
+    const concept = RANDOM_CONCEPTS[Math.floor(Math.random() * RANDOM_CONCEPTS.length)];
+    const typeCount = Math.random() < 0.5 ? 1 : 2;
+    const types = pickRandom(ALL_TYPES, typeCount);
+    const randStats = randomStats();
+
+    setDescription(concept);
+    setSelectedTypes(types);
+    setStats(randStats);
+    setPreview(null);
+    setError(null);
+
+    // Auto-generate
+    try {
+      const creature = await generateCreature(concept, types, randStats);
+      setPreview(creature);
+    } catch {
+      // Error handled by store
+    }
+  };
 
   const handleGenerate = async () => {
     if (!description.trim()) {
@@ -132,6 +231,15 @@ export default function CreationScreen() {
             hoverColor={colors.accentHover}
             fontSize={16}
             width={200}
+          />
+          <Button
+            label="Random!"
+            onClick={handleRandom}
+            disabled={isGenerating}
+            color="#a855f7"
+            hoverColor="#c084fc"
+            fontSize={16}
+            width={120}
           />
           <Button
             label="Ready!"

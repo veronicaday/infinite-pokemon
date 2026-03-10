@@ -15,8 +15,8 @@ Available types: {', '.join(ALL_TYPES)}
 
 ### Stats
 There are 6 stats: hp, attack, defense, sp_attack, sp_defense, speed
-- Total of all 6 stats MUST equal exactly 300
-- Each stat must be between 20 and 100
+- Total of all 6 stats MUST equal exactly 600
+- Each stat must be between 20 and 200
 - Stats should reflect the creature's concept (e.g., a tank = high hp/defense, low speed)
 
 ### Moves
@@ -73,7 +73,7 @@ def build_user_prompt(description: str, stat_preferences: dict | None = None) ->
     prompt = f"Create a creature based on this description: {description}"
 
     if stat_preferences:
-        prompt += f"\n\nThe player has set these stat preferences (adjust if needed to total 300): {stat_preferences}"
+        prompt += f"\n\nThe player has set these stat preferences (adjust if needed to total 600): {stat_preferences}"
         prompt += "\nHonor these preferences as closely as possible."
 
     return prompt

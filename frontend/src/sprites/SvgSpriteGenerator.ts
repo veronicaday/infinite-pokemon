@@ -107,8 +107,8 @@ export function generateSvgSprite(creature: CreatureData, size: number = 128): s
   const bodyScale = 0.25 + (stats.hp / 100) * 0.25;
   let bodyW = Math.round(s * bodyScale);
   let bodyH = Math.round(s * bodyScale * rng.uniform(0.8, 1.3));
-  if (stats.speed > 60) { bodyH = Math.round(bodyH * 1.2); bodyW = Math.round(bodyW * 0.85); }
-  if (stats.defense > 60) { bodyW = Math.round(bodyW * 1.2); bodyH = Math.round(bodyH * 0.9); }
+  if (stats.speed > 120) { bodyH = Math.round(bodyH * 1.2); bodyW = Math.round(bodyW * 0.85); }
+  if (stats.defense > 120) { bodyW = Math.round(bodyW * 1.2); bodyH = Math.round(bodyH * 0.9); }
   const bodyY = cy - bodyH / 4;
 
   const bodyType = rng.choice(['round', 'diamond', 'blob', 'angular', 'tall']);
@@ -135,7 +135,7 @@ export function generateSvgSprite(creature: CreatureData, size: number = 128): s
   <filter id="shadow_${id}"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/></filter>`;
 
   // --- Sp.Attack > 60: aura glow ---
-  if (stats.sp_attack > 60) {
+  if (stats.sp_attack > 120) {
     const auraSize = bodyW * 0.8 + (stats.sp_attack / 100) * bodyW * 0.3;
     for (let i = 0; i < 3; i++) {
       const r = auraSize + i * 6;
@@ -185,7 +185,7 @@ export function generateSvgSprite(creature: CreatureData, size: number = 128): s
   }
 
   // --- Defense > 60: armor outline ---
-  if (stats.defense > 60) {
+  if (stats.defense > 120) {
     const alpha = Math.min(0.7, 0.3 + stats.defense / 200).toFixed(2);
     if (bodyType === 'round') {
       elements += `<ellipse cx="${cx}" cy="${bodyY}" rx="${bodyW / 2 + 3}" ry="${bodyH / 2 + 3}" fill="none" stroke="${darkColor}" stroke-width="3" opacity="${alpha}"/>`;
@@ -263,7 +263,7 @@ export function generateSvgSprite(creature: CreatureData, size: number = 128): s
   }
 
   // --- Arms ---
-  if (stats.attack > 40) {
+  if (stats.attack > 80) {
     const armLen = bodyW * 0.4 + (stats.attack / 100) * bodyW * 0.4;
     const armW = Math.max(2, 3 + stats.attack / 30);
     const armY = bodyY;

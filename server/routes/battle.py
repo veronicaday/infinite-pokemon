@@ -24,10 +24,23 @@ async def create_battle(request: BattleCreateRequest):
     engine = BattleEngine(creature1, creature2)
     session_id = create_session(engine)
 
+    # Preserve sprite SVGs from the request
+    session = get_session(session_id)
+    if session:
+        session.sprite_svgs = {
+            1: request.creature1.sprite_svg,
+            2: request.creature2.sprite_svg,
+        }
+
+    c1_schema = creature_to_schema(engine.creatures[1])
+    c2_schema = creature_to_schema(engine.creatures[2])
+    c1_schema.sprite_svg = request.creature1.sprite_svg
+    c2_schema.sprite_svg = request.creature2.sprite_svg
+
     return {
         "session_id": session_id,
-        "creature1": creature_to_schema(engine.creatures[1]),
-        "creature2": creature_to_schema(engine.creatures[2]),
+        "creature1": c1_schema,
+        "creature2": c2_schema,
     }
 
 
@@ -57,10 +70,15 @@ async def execute_turn(session_id: str, request: TurnRequest):
 
     events = engine.execute_turn(move1, move2)
 
+    c1_schema = creature_to_schema(engine.creatures[1])
+    c2_schema = creature_to_schema(engine.creatures[2])
+    c1_schema.sprite_svg = session.sprite_svgs.get(1)
+    c2_schema.sprite_svg = session.sprite_svgs.get(2)
+
     return {
         "events": [battle_event_to_schema(e) for e in events],
-        "creature1": creature_to_schema(engine.creatures[1]),
-        "creature2": creature_to_schema(engine.creatures[2]),
+        "creature1": c1_schema,
+        "creature2": c2_schema,
         "winner": engine.winner,
     }
 
@@ -74,9 +92,14 @@ async def get_battle_state(session_id: str):
 
     engine = session.engine
 
+    c1_schema = creature_to_schema(engine.creatures[1])
+    c2_schema = creature_to_schema(engine.creatures[2])
+    c1_schema.sprite_svg = session.sprite_svgs.get(1)
+    c2_schema.sprite_svg = session.sprite_svgs.get(2)
+
     return {
-        "creature1": creature_to_schema(engine.creatures[1]),
-        "creature2": creature_to_schema(engine.creatures[2]),
+        "creature1": c1_schema,
+        "creature2": c2_schema,
         "winner": engine.winner,
         "turn_number": engine.turn_number,
     }

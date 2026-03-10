@@ -10,9 +10,9 @@ FPS = 60
 GAME_TITLE = "Infinite Pokemon"
 
 # Stats
-STAT_BUDGET = 300
+STAT_BUDGET = 600
 MIN_STAT = 20
-MAX_STAT = 100
+MAX_STAT = 200
 STAT_NAMES = ["hp", "attack", "defense", "sp_attack", "sp_defense", "speed"]
 
 # Moves
