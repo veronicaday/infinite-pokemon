@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { colors } from '../styles/theme';
 import { useGameStore } from '../store/gameStore';
 import CreatureSprite from '../components/creatures/CreatureSprite';
@@ -7,6 +7,8 @@ import HealthBar from '../components/battle/HealthBar';
 import MoveButton from '../components/battle/MoveButton';
 import BattleLog from '../components/battle/BattleLog';
 import TurnGate from '../components/battle/TurnGate';
+import MoveAnimation from '../components/battle/MoveAnimation';
+import VsScreen from '../components/battle/VsScreen';
 import Button from '../components/ui/Button';
 
 export default function BattleScreen() {
@@ -30,6 +32,14 @@ export default function BattleScreen() {
   const c2 = creature2State || player2Creature;
   const eventIndexRef = useRef(0);
 
+  // Track active move animation: which creature (1 or 2) is being hit, and with what type
+  const [activeAnim, setActiveAnim] = useState<{
+    target: number;
+    moveType: string;
+    key: number;
+  } | null>(null);
+  const animKeyRef = useRef(0);
+
   // Animate battle events one by one
   useEffect(() => {
     if (battlePhase !== 'animating') return;
@@ -38,7 +48,16 @@ export default function BattleScreen() {
     eventIndexRef.current = 0;
     const interval = setInterval(() => {
       if (eventIndexRef.current < battleEvents.length) {
-        addDisplayedEvent(battleEvents[eventIndexRef.current]);
+        const event = battleEvents[eventIndexRef.current];
+        addDisplayedEvent(event);
+
+        // Trigger animation on "move" events (the defender is the other player)
+        if (event.event_type === 'move' && event.actor && event.move_type) {
+          const target = event.actor === 1 ? 2 : 1;
+          animKeyRef.current++;
+          setActiveAnim({ target, moveType: event.move_type, key: animKeyRef.current });
+        }
+
         eventIndexRef.current++;
       } else {
         clearInterval(interval);
@@ -84,64 +103,90 @@ export default function BattleScreen() {
         position: 'relative',
       }}
     >
-      {/* Top area: opponent (P2) */}
+      {/* Arena: both creatures facing off */}
       <div
         style={{
           display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'flex-start',
-          gap: 16,
-          marginBottom: 12,
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 24,
         }}
       >
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: 12, color: colors.textDim }}>Player 2</div>
-          <div style={{ fontSize: 22, fontWeight: 700 }}>{c2.name}</div>
-          <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', marginTop: 4 }}>
-            {c2.types.map((t) => (
-              <TypeBadge key={t} type={t} />
-            ))}
-          </div>
-          {c2.status && (
-            <div style={{ color: '#ff6464', fontSize: 13, marginTop: 4 }}>
-              {c2.status.toUpperCase()}
+        {/* Opponent (P2) — shifted right */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 16,
+            alignSelf: 'flex-end',
+            maxWidth: '70%',
+          }}
+        >
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: 12, color: colors.textDim }}>Player 2</div>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{c2.name}</div>
+            <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', marginTop: 4 }}>
+              {c2.types.map((t) => (
+                <TypeBadge key={t} type={t} />
+              ))}
             </div>
-          )}
-          <div style={{ marginTop: 6, display: 'flex', justifyContent: 'flex-end' }}>
-            <HealthBar current={c2.current_hp} max={c2.max_hp} width={220} />
+            {c2.status && (
+              <div style={{ color: '#ff6464', fontSize: 13, marginTop: 4 }}>
+                {c2.status.toUpperCase()}
+              </div>
+            )}
+            <div style={{ marginTop: 6, display: 'flex', justifyContent: 'flex-end' }}>
+              <HealthBar current={c2.current_hp} max={c2.max_hp} width={220} />
+            </div>
+          </div>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <CreatureSprite creature={c2} size={180} />
+            {activeAnim && activeAnim.target === 2 && (
+              <MoveAnimation
+                key={activeAnim.key}
+                moveType={activeAnim.moveType}
+                onComplete={() => setActiveAnim(null)}
+              />
+            )}
           </div>
         </div>
-        <CreatureSprite creature={c2} size={180} />
-      </div>
 
-      {/* Middle: sprites in arena */}
-      <div style={{ flex: 1 }} />
-
-      {/* Bottom area: player (P1) */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          gap: 16,
-          marginBottom: 12,
-        }}
-      >
-        <CreatureSprite creature={c1} size={220} />
-        <div>
-          <div style={{ fontSize: 12, color: colors.textDim }}>Player 1</div>
-          <div style={{ fontSize: 22, fontWeight: 700 }}>{c1.name}</div>
-          <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-            {c1.types.map((t) => (
-              <TypeBadge key={t} type={t} />
-            ))}
+        {/* Player (P1) — shifted left */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            gap: 16,
+            alignSelf: 'flex-start',
+            maxWidth: '70%',
+          }}
+        >
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <CreatureSprite creature={c1} size={220} />
+            {activeAnim && activeAnim.target === 1 && (
+              <MoveAnimation
+                key={activeAnim.key}
+                moveType={activeAnim.moveType}
+                onComplete={() => setActiveAnim(null)}
+              />
+            )}
           </div>
-          {c1.status && (
-            <div style={{ color: '#ff6464', fontSize: 13, marginTop: 4 }}>
-              {c1.status.toUpperCase()}
+          <div>
+            <div style={{ fontSize: 12, color: colors.textDim }}>Player 1</div>
+            <div style={{ fontSize: 22, fontWeight: 700 }}>{c1.name}</div>
+            <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+              {c1.types.map((t) => (
+                <TypeBadge key={t} type={t} />
+              ))}
             </div>
-          )}
-          <div style={{ marginTop: 6 }}>
-            <HealthBar current={c1.current_hp} max={c1.max_hp} width={220} />
+            {c1.status && (
+              <div style={{ color: '#ff6464', fontSize: 13, marginTop: 4 }}>
+                {c1.status.toUpperCase()}
+              </div>
+            )}
+            <div style={{ marginTop: 6 }}>
+              <HealthBar current={c1.current_hp} max={c1.max_hp} width={220} />
+            </div>
           </div>
         </div>
       </div>
@@ -194,6 +239,15 @@ export default function BattleScreen() {
         <TurnGate
           message="Player 2 — Choose your move!"
           onReady={() => setBattlePhase('select_p2')}
+        />
+      )}
+
+      {/* VS screen intro */}
+      {battlePhase === 'vs' && c1 && c2 && (
+        <VsScreen
+          creature1={c1}
+          creature2={c2}
+          onComplete={() => setBattlePhase('gate_p1')}
         />
       )}
 

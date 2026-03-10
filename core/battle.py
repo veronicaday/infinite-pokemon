@@ -16,6 +16,7 @@ class BattleEvent:
     message: str
     damage: int = 0
     effectiveness: float = 1.0
+    move_type: str | None = None  # type of the move used (for animations)
 
 
 class BattleEngine:
@@ -73,7 +74,8 @@ class BattleEngine:
                 events.append(BattleEvent("status", attacker_id, f"{attacker.name} {status_msg}"))
 
             # Use the move
-            events.append(BattleEvent("move", attacker_id, f"{attacker.name} used {move.name}!"))
+            move_type_str = move.type.value if hasattr(move.type, 'value') else str(move.type)
+            events.append(BattleEvent("move", attacker_id, f"{attacker.name} used {move.name}!", move_type=move_type_str))
 
             # Accuracy check
             if random.randint(1, 100) > move.accuracy:
@@ -102,6 +104,7 @@ class BattleEngine:
                     "damage", attacker_id,
                     f"{defender.name} took {damage} damage!{eff_msg}",
                     damage=damage, effectiveness=effectiveness,
+                    move_type=move_type_str,
                 ))
 
                 # Apply secondary effect

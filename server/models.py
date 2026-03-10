@@ -50,6 +50,7 @@ class BattleEventSchema(BaseModel):
     message: str
     damage: int = 0
     effectiveness: float | None = None
+    move_type: str | None = None
 
 
 class TurnRequest(BaseModel):
@@ -146,4 +147,5 @@ def battle_event_to_schema(event: BattleEvent) -> BattleEventSchema:
         message=event.message,
         damage=event.damage,
         effectiveness=event.effectiveness,
+        move_type=event.move_type,
     )

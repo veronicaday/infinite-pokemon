@@ -35,6 +35,7 @@ export interface BattleEvent {
   message: string;
   damage: number;
   effectiveness: number | null;
+  move_type: string | null;
 }
 
 export interface TypeInfo {
@@ -52,6 +53,7 @@ export interface GameConfig {
 
 export type Screen = 'menu' | 'creation' | 'battle';
 export type BattlePhase =
+  | 'vs'
   | 'gate_p1'
   | 'select_p1'
   | 'gate_p2'
