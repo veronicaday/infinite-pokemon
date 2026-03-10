@@ -68,7 +68,7 @@ export default function BattleScreen() {
           setBattlePhase('gate_p1');
         }
       }
-    }, 800);
+    }, 1400);
 
     return () => clearInterval(interval);
   }, [battleEvents, battlePhase]);
@@ -109,7 +109,7 @@ export default function BattleScreen() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 24,
+          gap: 8,
         }}
       >
         {/* Opponent (P2) — shifted right */}
@@ -119,7 +119,8 @@ export default function BattleScreen() {
             alignItems: 'flex-start',
             gap: 16,
             alignSelf: 'flex-end',
-            maxWidth: '70%',
+            maxWidth: '80%',
+            marginRight: '10%',
           }}
         >
           <div style={{ textAlign: 'right' }}>
@@ -158,7 +159,8 @@ export default function BattleScreen() {
             alignItems: 'flex-end',
             gap: 16,
             alignSelf: 'flex-start',
-            maxWidth: '70%',
+            maxWidth: '80%',
+            marginLeft: '10%',
           }}
         >
           <div style={{ position: 'relative', flexShrink: 0 }}>
