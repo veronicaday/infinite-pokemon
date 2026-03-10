@@ -42,7 +42,7 @@ class PokedexEntry(CreatureSchema):
     id: str
     created_at: str
     wins: int = 0
-    evolution_threshold: int = 1
+    evolution_threshold: int = 30
     evolved: bool = False
     losses: int = 0
 

@@ -66,7 +66,7 @@ Build the creature in layers, back to front:
 - **Bug**: Compound eyes, segmented body, antennae, wing cases, exoskeleton sheen, mandibles
 - **Rock**: Angular/faceted body, gray→brown stone texture, crystal accents, heavy/grounded
 - **Ghost**: Semi-transparent body (opacity 0.6-0.8), wispy edges, eerie glow, floating pose, hollow eyes
-- **Dragon**: Majestic horns/crest, deep blue→purple, scales pattern, powerful jaw, wing membranes
+- **Dragon**: Use a 3/4 view (not straight front-facing) to show wings and body proportions clearly. Majestic horns/crest, deep blue→purple→gold accents, individually drawn scales (use paths, not feTurbulence), powerful defined jaw and snout, wing membranes with visible bone structure. Prioritize a clean readable silhouette over heavy filter effects — dragons should look regal and imposing, not muddy. Strong edge definition on all body parts.
 - **Dark**: Dark palette with red/purple accents, sharp features, menacing eyes, shadow effects
 - **Steel**: Metallic gradients (silver→gray), rivets/plates, angular precision, specular highlights
 - **Fairy**: Pastel pinks/lavenders, sparkle particles, delicate wings, star/moon motifs, soft glow

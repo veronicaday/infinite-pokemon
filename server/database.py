@@ -36,7 +36,7 @@ def init_db() -> None:
                 status TEXT,
                 created_at TEXT NOT NULL,
                 wins INTEGER NOT NULL DEFAULT 0,
-                evolution_threshold INTEGER NOT NULL DEFAULT 1,
+                evolution_threshold INTEGER NOT NULL DEFAULT 30,
                 evolved INTEGER NOT NULL DEFAULT 0,
                 losses INTEGER NOT NULL DEFAULT 0
             )
@@ -46,7 +46,7 @@ def init_db() -> None:
         # Migration: add columns if they don't exist (for existing databases)
         for col, definition in [
             ("wins", "INTEGER NOT NULL DEFAULT 0"),
-            ("evolution_threshold", "INTEGER NOT NULL DEFAULT 1"),
+            ("evolution_threshold", "INTEGER NOT NULL DEFAULT 30"),
             ("evolved", "INTEGER NOT NULL DEFAULT 0"),
             ("losses", "INTEGER NOT NULL DEFAULT 0"),
         ]:
@@ -85,7 +85,7 @@ def save_creature(creature: CreatureSchema) -> str:
                 creature.status,
                 created_at,
                 0,
-                1,  # Default 1 for testing (normally random.randint(25, 50))
+                random.randint(25, 50),
                 0,
                 0,
             ),

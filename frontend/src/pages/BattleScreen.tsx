@@ -473,7 +473,7 @@ export default function BattleScreen() {
             }}
           >
             <p style={{ fontSize: 20, fontWeight: 700, margin: '0 0 8px', color: colors.text }}>
-              Are you sure you want to forfeit?
+              Are you sure you want to run away?
             </p>
             <p style={{ fontSize: 14, color: colors.textDim, margin: '0 0 24px' }}>
               The battle will be abandoned.
@@ -489,7 +489,7 @@ export default function BattleScreen() {
                 height={42}
               />
               <Button
-                label="Forfeit"
+                label="Run Away"
                 onClick={resetGame}
                 color="#dc3c3c"
                 hoverColor="#ff5555"
