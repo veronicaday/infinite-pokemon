@@ -111,7 +111,7 @@ export default function BattleScreen() {
             <HealthBar current={c2.current_hp} max={c2.max_hp} width={220} />
           </div>
         </div>
-        <CreatureSprite creature={c2} size={120} />
+        <CreatureSprite creature={c2} size={180} />
       </div>
 
       {/* Middle: sprites in arena */}
@@ -126,7 +126,7 @@ export default function BattleScreen() {
           marginBottom: 12,
         }}
       >
-        <CreatureSprite creature={c1} size={160} />
+        <CreatureSprite creature={c1} size={220} />
         <div>
           <div style={{ fontSize: 12, color: colors.textDim }}>Player 1</div>
           <div style={{ fontSize: 22, fontWeight: 700 }}>{c1.name}</div>

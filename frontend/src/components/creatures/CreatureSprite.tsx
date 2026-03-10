@@ -54,9 +54,22 @@ export default function CreatureSprite({
   }, [creature.name, creature.types.join(','), creature.sprite_svg, size, reactId]);
 
   return (
-    <div
-      dangerouslySetInnerHTML={{ __html: svg }}
-      style={{ width: size, height: size, flexShrink: 0 }}
-    />
+    <>
+      <style>{`
+        @keyframes sprite-bounce {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+        }
+      `}</style>
+      <div
+        dangerouslySetInnerHTML={{ __html: svg }}
+        style={{
+          width: size,
+          height: size,
+          flexShrink: 0,
+          animation: 'sprite-bounce 2s ease-in-out infinite',
+        }}
+      />
+    </>
   );
 }

@@ -5,6 +5,9 @@ import type { Stats, CreatureData } from '../types/game';
 import Button from '../components/ui/Button';
 import TypeSelector from '../components/creatures/TypeSelector';
 import StatSliders from '../components/creatures/StatSliders';
+import CreatureSprite from '../components/creatures/CreatureSprite';
+import TypeBadge from '../components/ui/TypeBadge';
+import { STAT_LABELS } from '../types/game';
 import CreatureCard from '../components/creatures/CreatureCard';
 
 const DEFAULT_STATS: Stats = {
@@ -264,28 +267,70 @@ export default function CreationScreen() {
         style={{
           flex: 1,
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
+          overflow: 'hidden',
         }}
       >
         {preview ? (
-          <CreatureCard creature={preview} size="lg" />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            {/* Big bouncing sprite */}
+            <CreatureSprite creature={preview} size={300} />
+
+            {/* Name + types */}
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: 28 }}>{preview.name}</h2>
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginTop: 8 }}>
+                {preview.types.map((t) => (
+                  <TypeBadge key={t} type={t} />
+                ))}
+              </div>
+              <p style={{ color: colors.textDim, fontSize: 13, marginTop: 8, maxWidth: 360 }}>
+                {preview.description}
+              </p>
+            </div>
+
+            {/* Stats + Moves side by side */}
+            <div style={{ display: 'flex', gap: 24, fontSize: 13 }}>
+              {/* Stats */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'auto auto',
+                gap: '2px 10px',
+              }}>
+                {(Object.keys(STAT_LABELS) as (keyof typeof STAT_LABELS)[]).map((key) => (
+                  <div key={key} style={{ display: 'contents' }}>
+                    <span style={{ color: colors.textDim, textAlign: 'right' }}>{STAT_LABELS[key]}</span>
+                    <span style={{ fontWeight: 600 }}>{preview.base_stats[key as keyof Stats]}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Moves */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {preview.moves.map((move) => (
+                  <div key={move.name} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <TypeBadge type={move.type} size="sm" />
+                    <span style={{ fontWeight: 500 }}>{move.name}</span>
+                    <span style={{ color: colors.textDim, fontSize: 11 }}>
+                      {move.power > 0 ? `${move.power}pw` : 'status'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         ) : (
           <div
             style={{
-              background: colors.panel,
-              border: `2px solid ${colors.panelBorder}`,
-              borderRadius: 12,
-              padding: 40,
               textAlign: 'center',
               color: colors.textDim,
-              width: 340,
             }}
           >
             {isGenerating ? (
               <div>
                 <div style={{ position: 'relative', width: 120, height: 120, margin: '0 auto 20px' }}>
-                  {/* Outer ring */}
                   <div style={{
                     position: 'absolute', inset: 0,
                     border: `3px solid ${colors.panelBorder}`,
@@ -294,7 +339,6 @@ export default function CreationScreen() {
                     borderRadius: '50%',
                     animation: 'spin 1.5s linear infinite',
                   }} />
-                  {/* Inner ring (counter-rotate) */}
                   <div style={{
                     position: 'absolute', inset: 16,
                     border: `2px solid ${colors.panelBorder}`,
@@ -303,7 +347,6 @@ export default function CreationScreen() {
                     borderRadius: '50%',
                     animation: 'spin-reverse 1s linear infinite',
                   }} />
-                  {/* Center orb */}
                   <div style={{
                     position: 'absolute', inset: 36,
                     borderRadius: '50%',
@@ -311,7 +354,6 @@ export default function CreationScreen() {
                     animation: 'pulse 1.2s ease-in-out infinite',
                     boxShadow: `0 0 20px ${colors.accent}40`,
                   }} />
-                  {/* Floating particles */}
                   {[0, 1, 2, 3, 4, 5].map((i) => (
                     <div key={i} style={{
                       position: 'absolute',
@@ -344,7 +386,7 @@ export default function CreationScreen() {
                 `}</style>
               </div>
             ) : (
-              <p>Your creature will appear here</p>
+              <p style={{ fontSize: 16 }}>Your creature will appear here</p>
             )}
           </div>
         )}
