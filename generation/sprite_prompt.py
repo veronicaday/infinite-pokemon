@@ -78,10 +78,10 @@ Build the creature in layers, back to front:
 
 
 def build_sprite_prompt(
-    name: str,
     description: str,
     types: list[str],
     stats: dict[str, int],
+    name: str | None = None,
 ) -> str:
     type_str = "/".join(types)
     highest_stat = max(stats, key=lambda k: stats[k])
@@ -93,9 +93,11 @@ def build_sprite_prompt(
     if strong_stats:
         stat_profile = f"Strong in: {', '.join(strong_stats)}. "
 
+    name_line = f"**Name**: {name}\n" if name else ""
+
     return (
         f"Create a detailed, high-quality SVG sprite for this creature.\n\n"
-        f"**Name**: {name}\n"
+        f"{name_line}"
         f"**Description**: {description}\n"
         f"**Types**: {type_str}\n"
         f"**Stats**: {stats}\n"

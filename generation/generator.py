@@ -21,12 +21,12 @@ class CreatureGenerator:
         self.client = anthropic.Anthropic(api_key=key)
 
     def generate(self, description: str, stat_preferences: Stats | None = None) -> Creature:
-        """Generate a creature from a text description using Claude."""
+        """Generate a creature from a text description using Claude (Sonnet for speed)."""
         stat_dict = stat_preferences.as_dict() if stat_preferences else None
         user_prompt = build_user_prompt(description, stat_dict)
 
         message = self.client.messages.create(
-            model="claude-opus-4-6",
+            model="claude-sonnet-4-6",
             max_tokens=1024,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
@@ -37,13 +37,13 @@ class CreatureGenerator:
 
     def generate_sprite(
         self,
-        name: str,
         description: str,
         types: list[str],
         stats: dict[str, int],
+        name: str | None = None,
     ) -> str:
-        """Generate an SVG sprite for a creature using Claude."""
-        user_prompt = build_sprite_prompt(name, description, types, stats)
+        """Generate an SVG sprite for a creature using Claude (Opus for quality)."""
+        user_prompt = build_sprite_prompt(description, types, stats, name)
 
         message = self.client.messages.create(
             model="claude-opus-4-6",

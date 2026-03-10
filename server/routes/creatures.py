@@ -43,29 +43,43 @@ async def generate_creature(request: CreatureCreateRequest):
             f"Set \"types\" to {request.types} in your response."
         )
 
-        # Run creature data + sprite generation in parallel
+        # Build stat dict for sprite prompt
+        sprite_stats = (
+            stat_prefs.as_dict()
+            if stat_prefs
+            else {"hp": 100, "attack": 100, "defense": 100,
+                  "sp_attack": 100, "sp_defense": 100, "speed": 100}
+        )
+
+        # Run creature data (Sonnet, fast) + sprite (Opus, detailed) in PARALLEL
         creature_task = asyncio.to_thread(
             generator.generate, description_with_types, stat_prefs
         )
+        sprite_task = asyncio.to_thread(
+            generator.generate_sprite,
+            request.description,
+            request.types,
+            sprite_stats,
+        )
 
-        # We need creature data first for the sprite prompt, but we can
-        # start with user-provided info for the sprite call
-        creature = await creature_task
+        # Wait for both concurrently
+        creature, sprite_svg = await asyncio.gather(
+            creature_task,
+            sprite_task,
+            return_exceptions=True,
+        )
 
-        # Now generate sprite with the actual creature data
+        # Handle creature generation failure
+        if isinstance(creature, Exception):
+            raise creature
+
         schema = creature_to_schema(creature)
-        try:
-            sprite_svg = await asyncio.to_thread(
-                generator.generate_sprite,
-                creature.name,
-                creature.description,
-                [t.value for t in creature.types],
-                schema.base_stats.model_dump(),
-            )
-            schema.sprite_svg = sprite_svg
-        except Exception:
-            # Sprite generation failed — frontend will fall back to procedural
+
+        # Attach sprite if it succeeded
+        if isinstance(sprite_svg, Exception):
             schema.sprite_svg = None
+        else:
+            schema.sprite_svg = sprite_svg
 
         return schema
 
