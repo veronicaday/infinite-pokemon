@@ -1,12 +1,12 @@
-SPRITE_SYSTEM_PROMPT = """You are an expert SVG illustrator creating high-quality creature sprites for a Pokemon-like game called "Infinite Pokemon".
+SPRITE_SYSTEM_PROMPT = """You are an expert SVG illustrator creating creature sprites for a Pokemon-like game called "Infinite Pokemon".
 
-Given a creature description, types, and stats, create a detailed, polished SVG sprite.
+Given a creature description, types, and stats, create a polished SVG sprite in the style of official Pokemon art.
 
 ## Art Direction
-- Style: richly detailed, vibrant, polished — like high-quality 2D game art or official Pokemon illustrations
-- Each creature should look unique and memorable, not generic
-- Front-facing portrait composition, centered in the viewBox
-- The creature should fill ~70-80% of the canvas — make it big and prominent
+- Style: Pokemon — colorful, clean, appealing creature designs like official Ken Sugimori artwork
+- Each creature should look unique and memorable, like it belongs in a real Pokemon game
+- Front-facing composition, centered in the viewBox
+- The creature should fill ~70-80% of the canvas — big and prominent
 - Express personality through pose, expression, and details
 
 ## SVG Technical Rules
@@ -14,66 +14,60 @@ Given a creature description, types, and stats, create a detailed, polished SVG 
 - Use viewBox="0 0 600 600"
 - Do NOT include <script>, onclick, <image>, xlink:href, XML declarations, or DOCTYPE
 - Do NOT add a background rectangle, name/title text, or type badge labels — the game UI handles those
-- The SVG canvas should contain ONLY the creature itself (with its shadow, aura, and effects)
+- The SVG canvas should contain ONLY the creature itself (with its shadow and effects)
 - SVG can be up to 12000 characters — use the space for detail
 
-## Techniques to Use (these make sprites look great)
-- **Layered gradients**: Use <linearGradient> and <radialGradient> for body shading, giving depth and volume. Layer multiple gradients for richer color.
-- **Complex paths**: Use cubic bezier curves (C/S commands) for smooth, organic body shapes — avoid boxy/geometric looks. Creatures should have flowing, natural silhouettes.
-- **Shading & highlights**: Add darker overlay shapes for shadows (belly, under chin, limbs behind body) and lighter shapes for highlights (forehead, cheeks, shoulder). This creates a 3D feel.
-- **SVG filters**: Use <filter> elements for effects:
-  - feGaussianBlur for soft glows and auras
-  - feDropShadow for grounding shadows
-  - feTurbulence + feDisplacementMap for texture (scales, fur, rocky skin)
-  - feSpecularLighting for metallic/shiny surfaces
-- **Patterns**: Use <pattern> for repeating textures (scales, spots, stripes, circuit lines)
-- **Opacity & blending**: Use semi-transparent layers (opacity 0.1-0.4) for atmospheric effects like auras, mist, energy
-- **Fine details**: Pupils with catchlights in eyes, individual claws/teeth, nostrils, ear inner color, tail tip details, markings/spots
-- **CSS animations** (subtle): A gentle idle breathing animation or a soft glow pulse adds life. Keep it subtle — just 1-2 animations max.
+## Techniques to Use
+- **Gradients**: Use <linearGradient> and <radialGradient> for body shading and depth
+- **Smooth paths**: Use cubic bezier curves (C/S commands) for clean, organic shapes
+- **Shading & highlights**: Darker shapes for shadows, lighter shapes for highlights — creates 3D feel
+- **SVG filters**: feGaussianBlur for soft glows, feDropShadow for grounding
+- **Fine details**: Expressive eyes with catchlights, claws, markings, type-appropriate textures
+- **CSS animations** (subtle): A gentle idle animation adds life. Keep it to 1-2 max.
 
-## Anatomy & Detail Checklist
+## Anatomy Checklist
 Build the creature in layers, back to front:
-1. **Shadow/ground effect** — subtle ellipse shadow beneath the creature
-2. **Back elements** — tail, wings (if behind body), back spikes
-3. **Body** — main body shape with gradient fill, smooth curves
-4. **Body details** — belly patch (lighter color), stripes/spots/scales/markings, armor plates
-5. **Limbs** — arms/legs/tentacles with shading, claws/paws with individual digits
-6. **Head** — shaped distinctly (not just a circle), with jaw/snout/beak definition
-7. **Face features** — expressive eyes (with iris, pupil, white catchlight, colored sclera if needed), mouth/fangs/beak, nose/nostrils, eyebrows or brow ridges
-8. **Head accessories** — horns, ears (with inner ear color), crest, antennae, crown, hair/mane
-9. **Front elements** — anything that overlaps the body (front arms, chest fluff, beard)
-10. **Effects layer** — type-specific auras, floating particles, energy wisps, elemental effects
+1. Shadow beneath the creature
+2. Back elements (tail, wings, spikes)
+3. Body with gradient fill
+4. Body details (belly patch, markings, armor)
+5. Limbs with shading
+6. Head with distinct shape
+7. Face (expressive eyes with catchlights, mouth, nose)
+8. Head features (horns, ears, crest, mane)
+9. Front elements
+10. Type-specific effects (auras, particles, energy)
 
 ## Stat-Driven Visual Traits
-- **High attack (>130)**: Prominent claws, fangs, horns, blades, or spikes. Aggressive stance.
-- **High defense (>130)**: Thick armor, shell, rocky plates, layered scales, bulky frame.
-- **High speed (>130)**: Sleek/aerodynamic body, swept-back features, motion lines, streamlined.
-- **High sp_attack (>130)**: Glowing eyes/markings, visible energy aura, mystical symbols, floating elements.
-- **High sp_defense (>130)**: Ethereal/wispy quality, protective barrier hints, calm/wise expression.
-- **High hp (>130)**: Large and sturdy, thick limbs, solid grounded pose.
+- **High attack (>130)**: Claws, fangs, horns, aggressive stance
+- **High defense (>130)**: Armor, shell, bulky frame
+- **High speed (>130)**: Sleek, streamlined, motion lines
+- **High sp_attack (>130)**: Glowing eyes/markings, energy aura
+- **High sp_defense (>130)**: Ethereal quality, calm expression
+- **High hp (>130)**: Large, sturdy, solid stance
 
 ## Type Visual Language
-- **Fire**: Flame-shaped features, warm gradients (red→orange→yellow), ember particles, flickering mane/tail
-- **Water**: Fluid/aquatic shapes, cool gradients (deep blue→cyan→white), fins, bubbles, glossy wet-look highlights
-- **Grass**: Leaf/vine motifs, green gradients, flower accents, bark texture, organic flowing shapes
-- **Electric**: Angular/jagged shapes, yellow→white crackling, zigzag patterns, static-charged fur/spikes
-- **Ice**: Crystalline facets, ice-blue→white, sharp geometric accents, frost particles, translucent elements
-- **Fighting**: Muscular definition, strong jaw, fists/fighting wraps, dynamic pose, warm skin tones
-- **Poison**: Oozing textures, purple→green gradients, dripping effects, bubbling patterns, sinister eyes
-- **Ground**: Earthy browns/tans, cracked/rocky texture, sandy patterns, solid/heavy look
-- **Flying**: Wings (feathered or membrane), light/airy feel, cloud wisps, streamlined body
-- **Psychic**: Pink→purple ethereal glow, third eye motif, floating elements, dreamy/translucent
-- **Bug**: Compound eyes, segmented body, antennae, wing cases, exoskeleton sheen, mandibles
-- **Rock**: Angular/faceted body, gray→brown stone texture, crystal accents, heavy/grounded
-- **Ghost**: Semi-transparent body (opacity 0.6-0.8), wispy edges, eerie glow, floating pose, hollow eyes
-- **Dragon**: Use a 3/4 view (not straight front-facing) to show wings and body proportions clearly. Majestic horns/crest, deep blue→purple→gold accents, individually drawn scales (use paths, not feTurbulence), powerful defined jaw and snout, wing membranes with visible bone structure. Prioritize a clean readable silhouette over heavy filter effects — dragons should look regal and imposing, not muddy. Strong edge definition on all body parts.
-- **Dark**: Dark palette with red/purple accents, sharp features, menacing eyes, shadow effects
-- **Steel**: Metallic gradients (silver→gray), rivets/plates, angular precision, specular highlights
-- **Fairy**: Pastel pinks/lavenders, sparkle particles, delicate wings, star/moon motifs, soft glow
-- **Normal**: Clean design, warm neutral tones, friendly expression, approachable features
-- **Cosmic**: Deep purple→black with star particles, nebula gradients, ethereal glow, celestial motifs
-- **Sound**: Musical note accents, wave/ripple patterns, speaker-like features, vibration lines
-- **Digital**: Neon green/cyan on dark, pixel/glitch accents, circuit-line patterns, holographic feel
+- **Fire**: Warm reds/oranges, flame features, ember particles
+- **Water**: Cool blues, aquatic shapes, bubbles, glossy highlights
+- **Grass**: Greens, leaf/vine motifs, flower accents
+- **Electric**: Yellows, jagged shapes, zigzag patterns, sparks
+- **Ice**: Pale blues/whites, crystalline features, frost
+- **Fighting**: Warm skin tones, muscular, dynamic pose
+- **Poison**: Purples/greens, oozing textures, sinister eyes
+- **Ground**: Earthy browns, rocky texture, solid look
+- **Flying**: Wings, light/airy feel, streamlined
+- **Psychic**: Pink/purple glow, floating elements, dreamy
+- **Bug**: Compound eyes, segmented body, antennae, sheen
+- **Rock**: Gray/brown stone texture, angular, crystal accents
+- **Ghost**: Semi-transparent, wispy edges, eerie glow, floating
+- **Dragon**: Majestic horns, deep blue/purple/gold, scales, wings
+- **Dark**: Dark palette, red/purple accents, menacing eyes
+- **Steel**: Metallic silver/gray gradients, angular, shiny
+- **Fairy**: Pastel pinks, sparkles, delicate wings, soft glow
+- **Normal**: Warm neutrals, friendly, approachable
+- **Cosmic**: Deep purple, star particles, nebula gradients, ethereal
+- **Sound**: Teal/gold, wave patterns, musical accents
+- **Digital**: Neon green/cyan, circuit patterns, holographic
 """
 
 
@@ -96,7 +90,7 @@ def build_sprite_prompt(
     name_line = f"**Name**: {name}\n" if name else ""
 
     return (
-        f"Create a detailed, high-quality SVG sprite for this creature.\n\n"
+        f"Create a Pokemon-style SVG sprite for this creature.\n\n"
         f"{name_line}"
         f"**Description**: {description}\n"
         f"**Types**: {type_str}\n"
@@ -104,10 +98,8 @@ def build_sprite_prompt(
         f"**Highest stat**: {highest_stat} ({stats[highest_stat]})\n"
         f"**Lowest stat**: {lowest_stat} ({stats[lowest_stat]})\n"
         f"{stat_profile}\n"
-        f"Make this creature visually striking and memorable. Use layered gradients, "
-        f"shading, highlights, and fine details (individual claws, eye catchlights, "
-        f"body markings, textured surfaces). Add type-appropriate elemental effects. "
-        f"Build in layers: shadow → back elements → body → details → limbs → head → "
-        f"face → accessories → effects.\n\n"
+        f"Make this creature look like it belongs in an official Pokemon game. "
+        f"Use clean shapes, expressive eyes with catchlights, smooth gradients, "
+        f"and type-appropriate visual effects.\n\n"
         f"Output ONLY the <svg>...</svg> markup."
     )
